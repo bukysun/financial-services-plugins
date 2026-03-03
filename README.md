@@ -30,7 +30,7 @@ Start with **financial analysis** — the core plugin that provides shared model
 
 | Plugin | Type | How it helps | Connectors |
 |--------|------|-------------|------------|
-| **[financial analysis](./financial-analysis)** | Core (install first) | Build comps, DCF models, LBO models, and 3-statement financials. QC presentations and create reusable PPT templates. Provides the shared foundation and all data connectors. | Daloopa, Morningstar, S&P Global, FactSet, Moody's, MT Newswires, Aiera, LSEG, PitchBook, Chronograph, Egnyte |
+| **[financial analysis](./financial-analysis)** | Core (install first) | Build comps, DCF models, LBO models, and 3-statement financials. QC presentations and create reusable PPT templates. Provides the shared foundation and all data connectors. | Yahoo Finance, FRED (Federal Reserve Economic Data), SEC EDGAR |
 | **[investment banking](./investment-banking)** | Add-on | Draft CIMs, teasers, and process letters. Build buyer lists, run merger models, create strip profiles, and track live deals through milestones. | — |
 | **[equity research](./equity-research)** | Add-on | Write earnings updates and initiating coverage reports. Maintain investment theses, track catalysts, draft morning notes, and screen for new ideas. | — |
 | **[private equity](./private-equity)** | Add-on | Source and screen deals, run due diligence checklists, analyze unit economics and returns, draft IC memos, and monitor portfolio company KPIs. | — |
@@ -105,21 +105,13 @@ Every component is file-based — markdown and JSON, no code, no infrastructure,
 
 All connectors are centralized in the **financial analysis** core plugin and shared across all add-on plugins.
 
-| Provider | URL |
-|----------|-----|
-| [Daloopa](https://www.daloopa.com/) | `https://mcp.daloopa.com/server/mcp` |
-| [Morningstar](https://www.morningstar.com/) | `https://mcp.morningstar.com/mcp` |
-| [S&P Global](https://www.spglobal.com/) | `https://kfinance.kensho.com/integrations/mcp` |
-| [FactSet](https://www.factset.com/) | `https://mcp.factset.com/mcp` |
-| [Moody's](https://www.moodys.com/) | `https://api.moodys.com/genai-ready-data/m1/mcp` |
-| [MT Newswires](https://www.mtnewswires.com/) | `https://vast-mcp.blueskyapi.com/mtnewswires` |
-| [Aiera](https://www.aiera.com/) | `https://mcp-pub.aiera.com` |
-| [LSEG](https://www.lseg.com/) | `https://api.analytics.lseg.com/lfa/mcp` |
-| [PitchBook](https://pitchbook.com/) | `https://premium.mcp.pitchbook.com/mcp` |
-| [Chronograph](https://www.chronograph.pe/) | `https://ai.chronograph.pe/mcp` |
-| [Egnyte](https://www.egnyte.com/) | `https://mcp-server.egnyte.com/mcp` |
+| MCP Server | Type | Cost | Capabilities |
+|------------|------|------|-------------|
+| **Yahoo Finance** (`yfinance-mcp`) | stdio (local) | Free | Stock quotes, historical prices, fundamentals, company info, news |
+| **FRED** (`fred-mcp-server`) | stdio (local) | Free (API key) | Interest rates, macroeconomic indicators, inflation data, Treasury yields |
+| **SEC EDGAR** (`axiom-data-mcp`) | stdio (local) | Free | US public company filings (10-K/10-Q/8-K), filing search |
 
-> MCP access may require a subscription or API key from the respective provider.
+> FRED requires a free API key — register at https://fred.stlouisfed.org/docs/api/api_key.html
 
 ## Making Them Yours
 
