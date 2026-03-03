@@ -1,8 +1,17 @@
 {
   "mcpServers": {
-    "spglobal": {
-      "type": "http",
-      "url": "https://kfinance.kensho.com/integrations/mcp"
+    "yahoo-finance": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "yfinance-mcp"]
+    },
+    "sec-edgar": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "axiom-data-mcp"],
+      "env": {
+        "SEC_EDGAR_USER_AGENT": "YourName your@email.com"
+      }
     }
   }
 }
