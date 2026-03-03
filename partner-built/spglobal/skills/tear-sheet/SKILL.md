@@ -1,11 +1,11 @@
 ---
 name: tear-sheet
-description: "Generate professional company tear sheets using S&P Capital IQ data via the Kensho LLM-ready API MCP server. Use this skill whenever the user asks for a tear sheet, company one-pager, company profile, fact sheet, company snapshot, or company overview document — especially when they mention a specific company name or ticker. Also trigger when users ask for equity research summaries, M&A company profiles, corporate development target profiles, sales/BD meeting prep documents, or any concise single-company financial summary. This skill supports four audience types: equity research, investment banking/M&A, corporate development, and sales/business development. If the user doesn't specify an audience, ask. Works for both public and private companies."
+description: "Generate professional company tear sheets using Yahoo Finance and SEC EDGAR data. Use this skill whenever the user asks for a tear sheet, company one-pager, company profile, fact sheet, company snapshot, or company overview document — especially when they mention a specific company name or ticker. Also trigger when users ask for equity research summaries, M&A company profiles, corporate development target profiles, sales/BD meeting prep documents, or any concise single-company financial summary. This skill supports four audience types: equity research, investment banking/M&A, corporate development, and sales/business development. If the user doesn't specify an audience, ask. Works for both public and private companies."
 ---
 
 # Financial Tear Sheet Generator
 
-Generate audience-specific company tear sheets by pulling live data from S&P Capital IQ via the S&P Global MCP tools and formatting the result as a professional Word document.
+Generate audience-specific company tear sheets by pulling live data from Yahoo Finance and SEC EDGAR and formatting the result as a professional Word document.
 
 ## Style Configuration
 
@@ -69,7 +69,7 @@ These are sensible defaults. To customize for your firm's brand, modify this sec
 
 **Footer (document footer, not inline):**
 Place the source attribution and disclaimer in the actual document footer (repeated on every page), not as inline body text at the bottom. The footer is exactly two lines, centered, on every page:
-- Line 1: "Data: S&P Capital IQ via Kensho | Analysis: AI-generated | [Month Day, Year]"
+- Line 1: "Data: Yahoo Finance & SEC EDGAR | Analysis: AI-generated | [Month Day, Year]"
 - Line 2: "For informational purposes only. Not investment advice."
 - Style: 7pt italic, centered, #666666 text color
 - This footer text must be identical across all tear sheet types for the same company. Do not vary the wording by audience.
@@ -289,7 +289,7 @@ function createFooter(date) {
       new Paragraph({
         children: [
           new TextRun({
-            text: `Data: S&P Capital IQ via Kensho | Analysis: AI-generated | ${date}`,
+            text: `Data: Yahoo Finance & SEC EDGAR | Analysis: AI-generated | ${date}`,
             italics: true,
             size: 14, // 7pt
             color: COLORS.FOOTER_TEXT,
@@ -343,7 +343,7 @@ Gather up to four things before proceeding:
    - **IB / M&A** — for bankers profiling a company in transaction context
    - **Corp Dev** — for internal strategic teams evaluating an acquisition target
    - **Sales / BD** — for commercial teams preparing for a client meeting
-3. **Comparable companies** (optional) — if the user has specific comps in mind, note them. Otherwise the skill will identify peers from S&P Global data. This matters for Equity Research, IB/M&A, and Corp Dev tear sheets.
+3. **Comparable companies** (optional) — if the user has specific comps in mind, note them. Otherwise the skill will identify peers from Yahoo Finance company info or web search. This matters for Equity Research, IB/M&A, and Corp Dev tear sheets.
 4. **Page length preference** (optional) — defaults vary by audience (see below), but the user can override.
 
 If the user doesn't specify an audience, ask.
@@ -359,14 +359,14 @@ Read the corresponding reference file from this skill's directory:
 
 Each reference defines sections, a query plan, formatting guidance, and page length defaults.
 
-### Step 3: Pull Data via S&P Global MCP
+### Step 3: Pull Data via Yahoo Finance MCP and SEC EDGAR MCP
 
 **First:** Create the intermediate file directory:
 ```bash
 mkdir -p /tmp/tear-sheet/
 ```
 
-Use the **S&P Global** MCP tools (also known as the Kensho LLM-ready API). Claude will have access to structured tools for financial data, company information, market data, consensus estimates, earnings transcripts, M&A transactions, and business relationships. The query plans in each reference file describe what data to retrieve for each section — map these to the appropriate S&P Global tools available in the conversation.
+Use **Yahoo Finance MCP** for market data, stock prices, fundamentals (income statement, balance sheet, cash flow), company info, and news. Use **SEC EDGAR MCP** for official filing data (10-K, 10-Q, 8-K), segment disclosures, and management discussion sections. For analyst consensus estimates and earnings transcripts, use web search. The query plans in each reference file describe what data to retrieve for each section — map these to Yahoo Finance MCP, SEC EDGAR MCP, and web search tools available in the conversation.
 
 **After each query step, immediately write the retrieved data to the intermediate file(s) specified in the reference file's query plan.** Do not defer writes — data written to disk is protected from context degradation in long conversations.
 
@@ -374,7 +374,7 @@ Use the **S&P Global** MCP tools (also known as the Kensho LLM-ready API). Claud
 Each reference file includes a query plan with 4-6 data retrieval steps. These are starting points, not rigid constraints. Prioritize data completeness over minimizing calls:
 
 - **Always pull 4 fiscal years of financial data**, even though only 3 years are displayed. The fourth (earliest) year is needed to compute YoY revenue growth for the first displayed year. Without it, the earliest year's growth rate will show "N/A" — which looks like missing data, not a design choice.
-- Execute the query plan as written, using whichever S&P Global tools match the data needed.
+- Execute the query plan as written, using whichever Yahoo Finance MCP, SEC EDGAR MCP, or web search tools match the data needed.
 - If a tool call returns incomplete results, try alternative tools or narrower queries. For example, if company summary doesn't include segment detail, try the segments tool directly.
 - If a data point isn't returned after a targeted retry, move on — label it "N/A" or "Not disclosed."
 - Never fabricate data. If the tools don't return a number, do not estimate from training knowledge.
@@ -384,7 +384,7 @@ Each reference file includes a query plan with 4-6 data retrieval steps. These a
 **Optional context from the user:** Listen for additional context the user provides naturally. If they mention who the acquirer is ("we're looking at this for our platform"), what they sell ("we sell data analytics to banks"), or who the likely buyers are ("this would be interesting to Salesforce or Microsoft"), incorporate that context into the relevant synthesis sections (Strategic Fit, Conversation Starters, Deal Angle). Don't prompt for this information — just use it if offered.
 
 **Private company handling:**
-CIQ includes private company data, so query the same way. However, expect sparser results. When generating for a private company:
+Yahoo Finance and SEC EDGAR primarily cover US public companies. For private companies:
 - Skip: stock price, 52-week range, beta, stock performance, consensus estimates, trading comps
 - Lean into: business overview, relationships, ownership structure, whatever financials are available
 - Note "Private Company" prominently in the header
@@ -464,16 +464,16 @@ Save to `/mnt/user-data/outputs/` and present to the user.
 ## Data Integrity Rules
 
 These override everything else:
-1. **S&P Global tools are the only source for financial data.** Do not fill gaps with training knowledge — it may be stale or wrong.
+1. **Yahoo Finance MCP and SEC EDGAR MCP are the primary sources for financial data.** Do not fill gaps with training knowledge — it may be stale or wrong. Web search is permitted as a fallback for consensus estimates, earnings transcripts, and data not returned by these MCPs, but must be labeled as "Source: Web search."
 2. **Label what you can't find.** Use "N/A" or "Not disclosed" rather than omitting a row silently.
 3. **Dates matter.** Note the fiscal year end or reporting period. Don't assume calendar year = fiscal year. Market data (stock prices, market cap) should include an "as of" date.
 4. **Don't mix reporting periods.** If you have FY2023 revenue and LTM EBITDA, label them distinctly.
-5. **Prefer MCP-returned fields over manual computation.** If the S&P Global tools return a pre-computed field (e.g., net debt, EBITDA, FCF), use that value directly rather than computing it from components. Only compute derived metrics manually when the tools do not return the field. This reduces discrepancies.
+5. **Prefer MCP-returned fields over manual computation.** If Yahoo Finance MCP or SEC EDGAR MCP return a pre-computed field (e.g., net debt, EBITDA, FCF), use that value directly rather than computing it from components. Only compute derived metrics manually when the tools do not return the field. This reduces discrepancies.
 6. **Ensure consistency across tear sheet types.** If generating multiple tear sheets for the same company (e.g., equity research and IB/M&A in the same session), the same underlying data points must produce identical values across all outputs. Net debt, revenue, EBITDA, margins, and growth rates must match exactly. Do not re-query or re-compute independently per report — reuse the same retrieved values.
 7. **Never downgrade known transaction values.** If the M&A tools return a deal value for a transaction, that value must appear in the output. Do not replace a known deal value with "Undisclosed." Use "Undisclosed" only when the tools genuinely return no value for a transaction.
 8. **Use consolidated revenue as the denominator for segment percentages.** When computing "% of Total" for segment tables, divide each segment's revenue by consolidated total revenue (as reported on the income statement), not by the sum of segment revenues. The sum of segments often exceeds consolidated revenue due to intersegment eliminations. Using consolidated revenue ensures percentages align with the total revenue figure shown elsewhere in the document.
 9. **Always include forward (NTM) multiples when available.** If the tools return both trailing and forward valuation multiples, both must appear in the output. Forward multiples are the primary valuation reference for equity research, IB/M&A, and corp dev audiences. Never show only trailing multiples when forward data is available.
-10. **No S&P Global tool returns executive or management data.** Do not populate management names, titles, or biographical details from training data — this violates Rule 1 and produces stale information. If a management section appears in a template, omit it entirely. Ownership structure (institutional holders, insider %, PE sponsor) may be included only if returned by the tools — gate with "data permitting."
+10. **Executive and management data may appear in SEC EDGAR proxy filings (DEF 14A), but verify it is current** — proxy data can be months old. If management names are returned from SEC EDGAR filings, include the "as of" date of the source filing. Do not populate management data from training knowledge.
 
 ## Intermediate File Rule
 
