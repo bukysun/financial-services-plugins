@@ -13,21 +13,23 @@ Always start from the vol surface — it encodes the market's view of future unc
 
 ## Available MCP Tools
 
-- **`equity_vol_surface`** — Implied vol surface for equities/indices. Input: RIC (e.g., ".SPX@RIC") or RICROOT (e.g., "ES@RICROOT"). Returns vol by strike/delta and expiry.
-- **`fx_vol_surface`** — Implied vol surface for FX pairs. Input: currency pair (e.g., "EURUSD"). Returns vol by delta and expiry. FX surfaces are quoted in delta space.
-- **`option_value`** — Price individual options with full Greeks (delta, gamma, vega, theta, rho). Use after identifying specific strikes from the vol surface.
-- **`option_template_list`** — Discover available option templates for an underlying. Use to find valid expiries and strikes before pricing.
-- **`tscc_historical_pricing_summaries`** — Historical OHLC data. Use to compute realized vol from price history.
-- **`qa_historical_equity_price`** — Historical equity prices. Alternative source for realized vol computation.
+- **Yahoo Finance MCP (`get_quote`)** — Current stock price, implied volatility (IV) as reported by Yahoo, historical volatility estimate.
+- **Yahoo Finance MCP (`get_historical`)** — Historical OHLCV prices. Use to compute realized volatility (rolling 20-day and 60-day HV from daily log returns).
+- **Yahoo Finance MCP (`get_news`)** — Recent news and events. Use to identify upcoming catalysts that may affect vol.
+- **FRED MCP (`fred_get_series`)** — VIX (VIXCLS series) for market-wide implied vol context. Also macro indicators for backdrop.
+
+> **Note on options chains:** `yfinance-mcp` does not expose options chain data (strikes, expiries, per-strike IV). For options chain analysis, use web search for "[TICKER] options chain" or access Yahoo Finance options page directly. Full vol surface construction requires institutional data.
 
 ## Tool Chaining Workflow
 
-1. **Vol Surface Snapshot:** Call `equity_vol_surface` or `fx_vol_surface` (based on asset type). Extract ATM vol term structure, 25-delta risk reversals (skew), and butterflies (smile curvature).
-2. **Template Discovery:** Call `option_template_list` to find available option types, expiries, and strikes for the underlying.
-3. **Option Pricing:** Call `option_value` for specific options of interest. Extract premium, delta, gamma, vega, theta, implied vol.
-4. **Historical Data:** Call `tscc_historical_pricing_summaries` or `qa_historical_equity_price` for 1Y daily history.
-5. **Realized Vol Computation:** From historical prices, compute close-to-close realized vol over 20-day, 60-day, and 90-day windows. Compare to matching implied vol tenors.
-6. **Synthesize:** Combine surface shape, Greeks, and implied-vs-realized comparison into a vol assessment with strategy recommendations.
+1. **Current Market Context:** Call `get_quote` for the underlying stock. Note current price, any IV figure reported by Yahoo Finance.
+2. **Realized Volatility:** Call `get_historical` with period "1y" and interval "1d". Compute:
+   - 20-day HV: std dev of daily log returns over last 20 days × √252
+   - 60-day HV: std dev of daily log returns over last 60 days × √252
+3. **VIX Context:** Call `fred_get_series` for VIXCLS (VIX index) to assess market-wide implied vol regime. Compare stock's HV to VIX level for context.
+4. **Catalyst Scan:** Call `get_news` and web search for "[TICKER] upcoming earnings catalyst options". Note next earnings date and any known events that could spike vol.
+5. **Options Chain (web search):** Search web for "[TICKER] options chain implied volatility". Look for ATM IV across key expiries, vol skew signals (put vs call IV), and unusual options activity.
+6. **Synthesize:** Combine HV (realized), ATM IV from web search, and VIX context into a vol assessment: HV vs IV comparison (is IV rich or cheap?), vol term structure, key catalysts, and trading thesis.
 
 ## Output Format
 

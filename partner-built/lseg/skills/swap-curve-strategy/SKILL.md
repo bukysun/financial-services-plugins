@@ -13,20 +13,23 @@ The swap curve prices the market's expectation of future short-term rates, credi
 
 ## Available MCP Tools
 
-- **`ir_swap`** — Swap pricing. Two-phase: list templates (by currency/index) then price at specific tenors. Returns par swap rate, DV01, NPV.
-- **`interest_rate_curve`** — Government yield curves. Two-phase: list then calculate. Use for swap spread computation and curve shape context.
-- **`inflation_curve`** — Inflation breakeven curves. Two-phase: search then calculate. Use for real rate decomposition.
-- **`tscc_historical_pricing_summaries`** — Historical pricing data. Use for historical curve slope context and trend analysis.
-- **`qa_macroeconomic`** — Macro data. Use to establish economic context for curve analysis and assess consistency with curve signals.
+- **FRED MCP (`fred_get_series`)** — Government yield curves and real rate data. Key series for swap curve analysis:
+  - Treasury yields: DTB3, DGS1, DGS2, DGS3, DGS5, DGS7, DGS10, DGS20, DGS30
+  - TIPS (real yields): DFII5, DFII7, DFII10, DFII20, DFII30
+  - Breakevens: T5YIE, T10YIE
+  - SOFR (swap proxy): SOFR (overnight), SOFR30DAYAVG, SOFR90DAYAVG (30/90-day averages)
+- **FRED MCP (`fred_search`)** — Search for additional rate series.
+- **Yahoo Finance MCP (`get_news`)** — Recent central bank and rates news for qualitative context.
+
+> **Note on swap rates:** OTC swap rates (2Y, 5Y, 10Y, 30Y par swap) are not available from FRED or Yahoo Finance. SOFR term rates are available as a proxy. For actual swap spreads, note "swap rate data unavailable — use dealer quotes."
 
 ## Tool Chaining Workflow
 
-1. **Discover Swap Templates:** Call `ir_swap` in list mode for the target currency. Identify available indices and tenors.
-2. **Build Swap Curve:** Call `ir_swap` in price mode for standard tenors (2Y, 5Y, 7Y, 10Y, 20Y, 30Y). Extract par swap rate and DV01 at each point.
-3. **Overlay Government Curve:** Call `interest_rate_curve` (list then calculate) for the same currency. Compute swap spread = swap rate minus government yield at each tenor.
-4. **Inflation Decomposition:** Call `inflation_curve` (search then calculate). Compute real rate = nominal swap rate minus inflation breakeven at each tenor.
-5. **Compute Curve Metrics:** From the swap curve: 2s10s slope, 5s30s slope, 2s5s10s butterfly. Note curve shape classification.
-6. **Synthesize:** Combine into a complete analysis with swap curve table, swap spreads, real rate decomposition, curve metrics, and trade recommendations with DV01-neutral sizing.
+1. **Treasury Curve Snapshot:** Call `fred_get_series` for DTB3, DGS2, DGS5, DGS10, DGS30. Get the latest observation for each. Plot the curve. Compute: 2s10s slope, 5s30s slope, and 2s5s10s butterfly (2×5Y − 2Y − 10Y).
+2. **Real Rate Decomposition:** Call `fred_get_series` for DFII5, DFII10, DFII30 (TIPS) and T5YIE, T10YIE (breakevens). Compute real rates and breakeven inflation at 5Y, 10Y.
+3. **SOFR as Swap Proxy:** Call `fred_get_series` for SOFR30DAYAVG and SOFR90DAYAVG. Use as a proxy for the front end of the swap curve. Note that full par swap curves are unavailable.
+4. **Historical Curve Context:** Call `fred_get_series` for DGS2 and DGS10 with `observation_start` 3 years ago. Compute historical range of 2s10s slope. Assess where current curve sits vs history.
+5. **Synthesize:** Present the Treasury curve snapshot, real rate decomposition, and historical slope context. Propose curve trades (steepeners, flatteners, butterflies) based on current positioning vs history.
 
 ## Output Format
 

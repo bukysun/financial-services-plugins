@@ -13,27 +13,30 @@ Macro analysis synthesizes multiple indicators into a narrative. Always assess: 
 
 ## Available MCP Tools
 
-- **`qa_macroeconomic`** — Macro data series: GDP, CPI, PCE, unemployment, payrolls, PMI, retail sales. Multiple countries and frequencies. Search by mnemonic pattern or description.
-- **`interest_rate_curve`** — Government yield curves and swap curves. Two-phase: list then calculate. Use for curve shape and slope analysis.
-- **`inflation_curve`** — Inflation breakeven curves and real yields. Two-phase: search then calculate. Use for real rate decomposition.
-- **`ir_swap`** — Swap rates by tenor and currency. Two-phase: list templates then price. Use to compute swap spreads.
-- **`tscc_historical_pricing_summaries`** — Historical pricing data. Use for historical yield context and trend analysis.
+- **FRED MCP (`fred_get_series`)** — The primary source for all macroeconomic data and interest rate series. Key series:
+  - Macro: GDPC1 (real GDP), CPIAUCSL (CPI), PCEPI (PCE), UNRATE (unemployment), PAYEMS (nonfarm payrolls)
+  - Yields: DTB3 (3M T-bill), DGS2 (2Y), DGS5 (5Y), DGS10 (10Y), DGS30 (30Y)
+  - Real rates: DFII5 (5Y TIPS), DFII10 (10Y TIPS)
+  - Breakevens: T5YIE (5Y), T10YIE (10Y)
+  - Policy: FEDFUNDS (Fed Funds rate)
+- **FRED MCP (`fred_search`)** — Search for series by keyword (e.g., "CPI", "GDP", "unemployment"). Use when you don't know the exact series ID.
+- **Yahoo Finance MCP (`get_news`)** — Recent macro and central bank news for qualitative context.
+
+> **Note on swap rates:** Swap rates are not available from free sources. When swap spreads are needed, note "Swap rate data unavailable — use broker quotes or note as N/A."
 
 ## Tool Chaining Workflow
 
-1. **Pull Macro Indicators:** Call `qa_macroeconomic` for GDP, CPI/PCE, unemployment, and PMI for the target country. Retrieve latest values and recent series.
-2. **Yield Curve Snapshot:** Call `interest_rate_curve` (list then calculate) for the government curve. Extract yields at standard tenors. Compute 2s10s and 3M-10Y slopes. Classify curve shape.
-3. **Inflation Decomposition:** Call `inflation_curve` (search then calculate). Compute real rates = nominal minus breakeven at each tenor. Assess whether real rates are accommodative or restrictive.
-4. **Swap Spreads:** Call `ir_swap` (list then price) at 2Y, 5Y, 10Y. Compute swap spread = swap rate minus government yield at each tenor. Assess financial conditions.
-5. **Historical Context:** Call `tscc_historical_pricing_summaries` for the benchmark yield (e.g., 10Y). Assess where current yields sit vs recent history.
-6. **Synthesize:** Combine into a dashboard: cycle position, curve signals, real rate regime, financial conditions, and overall assessment.
+1. **Pull Macro Indicators:** Call `fred_get_series` for GDP (GDPC1), CPI (CPIAUCSL), PCE (PCEPI), unemployment (UNRATE), and payrolls (PAYEMS). Set `observation_start` to 2 years ago. Retrieve latest values and trend.
+2. **Yield Curve Snapshot:** Call `fred_get_series` for DTB3, DGS2, DGS5, DGS10, DGS30. Get the latest observation for each. Compute 2s10s slope (DGS10 minus DGS2) and 3M-10Y slope (DGS10 minus DTB3). Classify curve shape (normal / flat / inverted).
+3. **Real Rate Decomposition:** Call `fred_get_series` for DFII5, DFII10 (TIPS yields) and T5YIE, T10YIE (breakevens). Real rate = TIPS yield. Breakeven = nominal yield minus TIPS yield. Assess whether real rates are accommodative (negative) or restrictive (positive).
+4. **Historical Context:** Call `fred_get_series` for DGS10 with `observation_start` 3 years ago. Assess where current yields sit vs recent history (percentile rank).
+5. **Synthesize:** Combine into a macro dashboard: cycle position (GDP/jobs), inflation regime (CPI/PCE vs target), curve signals (slope + shape), real rate regime, and overall outlook.
 
 ## Macro Search Patterns
 
-When querying `qa_macroeconomic`, use wildcard patterns to discover mnemonics:
-- US: "US\*GDP\*", "US\*CPI\*", "US\*PCE\*", "US\*UNEMP\*"
-- Eurozone: "EZ\*GDP\*", "EZ\*HICP\*"
-- UK: "UK\*GDP\*", "UK\*CPI\*"
+When using `fred_search` to discover series:
+- Search by keyword: "GDP", "CPI", "unemployment", "payroll", "inflation"
+- FRED covers US data comprehensively. For non-US data, search by country name (e.g., "Germany GDP", "Japan CPI").
 - Prefer seasonally adjusted series. Monthly for most indicators; GDP is quarterly.
 
 ## Output Format
@@ -64,3 +67,9 @@ Present yields at key tenors (3M, 2Y, 5Y, 10Y, 30Y). Highlight 2s10s and 3M-10Y 
 
 ### Overall Assessment
 2-3 sentences on the macro-rates regime: cycle position, policy outlook, financial conditions, and key risks.
+
+## Data Availability Notes
+
+- **Swap rates and credit curves:** Not available from FRED. For swap spread context, use web search for current dealer-quoted swap rates or note "data unavailable from free sources."
+- **Non-US yield curves:** FRED covers select international rates (e.g., IRLTLT01DEA156N for German 10Y Bund yield). Search FRED for country-specific series.
+- **FX vol surfaces:** Not available from free sources. Note limitation when FX volatility context is needed.

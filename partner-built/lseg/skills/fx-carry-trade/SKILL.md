@@ -13,21 +13,21 @@ A carry trade earns the interest rate differential but bears FX spot risk. The c
 
 ## Available MCP Tools
 
-- **`fx_spot_price`** — Current spot rate for a currency pair. Returns mid/bid/ask. Starting point for all carry analysis.
-- **`fx_forward_price`** — Forward rate at a specific tenor. Returns forward points and outright rate. Use to compute carry at the target tenor.
-- **`fx_forward_curve`** — Full forward curve across all standard tenors. Two-phase: list then calculate. Use to map the carry term structure.
-- **`fx_vol_surface`** — Implied volatility surface by delta and expiry. Returns ATM vol, risk reversals, butterflies. Use for carry-to-vol ratio and skew assessment.
-- **`tscc_historical_pricing_summaries`** — Historical spot price data. Use to compute realized vol and assess spot trend direction.
-- **`interest_rate_curve`** — Yield curves by currency. Use to understand the rate differential driving the carry.
+- **FRED MCP (`fred_get_series`)** — FX spot rates (e.g., DEXUSEU for EUR/USD, DEXJPUS for JPY/USD, DEXUSUK for GBP/USD, DEXCHUS for CNY/USD) and interest rate differentials (DGS2, DGS10, FEDFUNDS). Covers major G10 pairs vs USD.
+- **FRED MCP (`fred_search`)** — Search for additional FX series or country-specific policy rates.
+- **Yahoo Finance MCP (`get_historical`)** — Historical FX price data for pairs available on Yahoo Finance (e.g., "EURUSD=X", "JPYUSD=X"). Use for realized volatility and spot trend analysis.
+- **Yahoo Finance MCP (`get_quote`)** — Current FX spot rate for Yahoo Finance-covered pairs.
+
+> **Note on FX vol surfaces and forward curves:** FX implied volatility surfaces and full forward curves are not available from free sources. ATM vol can be approximated from historical realized vol (from price history). Forward points must be approximated from interest rate differentials via covered interest rate parity.
 
 ## Tool Chaining Workflow
 
-1. **Get Spot Rate:** Call `fx_spot_price` for the currency pair. Note bid-ask spread as a liquidity indicator.
-2. **Price the Forward:** Call `fx_forward_price` at the target tenor. Compute annualized carry from forward points.
-3. **Map Carry Curve:** Call `fx_forward_curve` (list then calculate). Compute annualized carry at each tenor. Identify the sweet-spot tenor with best risk-adjusted carry.
-4. **Assess Vol Risk:** Call `fx_vol_surface`. Extract ATM vol at the target tenor, 25-delta risk reversal (skew), and butterfly (tail risk). Compute carry-to-vol ratio.
-5. **Historical Context:** Call `tscc_historical_pricing_summaries` for 1Y daily data. Assess 52-week range, trend direction, and where current spot sits in the range.
-6. **Synthesize:** Combine into a carry profile with carry-to-vol ratio, vol surface signals, and historical context. Recommend entry with position sizing guidance.
+1. **Get Spot Rate:** Call `get_quote` on Yahoo Finance for the currency pair (e.g., "EURUSD=X"). Note current spot and recent change.
+2. **Estimate Forward Points:** Retrieve interest rate for each currency from FRED (e.g., FEDFUNDS for USD, ECB deposit rate series for EUR). Compute annualized carry from interest rate differential. Forward points ≈ Spot × (r_foreign − r_domestic) × (days/360).
+3. **Historical Spot Context:** Call `get_historical` with period "1y" for the pair. Compute: 52-week range, where current spot sits in range, realized volatility (std dev of daily log returns × √252).
+4. **Carry-to-Vol Ratio:** Divide annualized carry by realized vol. This approximates the carry-to-vol ratio (realized vol as proxy for implied vol, since vol surfaces are unavailable).
+5. **Rate Differential Context:** Call `fred_get_series` for both countries' relevant policy or short-term rate series. Show the rate differential trend over 1–2 years.
+6. **Synthesize:** Combine carry estimate, carry-to-vol ratio, historical spot context, and rate differential trend into a carry profile. Note that forward curve and vol surface data are approximated.
 
 ## Output Format
 

@@ -13,20 +13,24 @@ Every piece of data must connect to an investment thesis. Pull consensus estimat
 
 ## Available MCP Tools
 
-- **`qa_ibes_consensus`** — IBES analyst consensus estimates and actuals. Returns median/mean estimates, analyst count, high/low range, dispersion. Supports EPS, Revenue, EBITDA, DPS.
-- **`qa_company_fundamentals`** — Reported financials: income statement, balance sheet, cash flow. Historical fiscal year data for ratio analysis.
-- **`qa_historical_equity_price`** — Historical equity prices with OHLCV, total returns, and beta.
-- **`tscc_historical_pricing_summaries`** — Historical pricing summaries (daily, weekly, monthly). Alternative/supplement for price history.
-- **`qa_macroeconomic`** — Macro indicators (GDP, CPI, unemployment, PMI). Use to establish the economic backdrop for the company's sector.
+- **Yahoo Finance MCP (`get_quote`)** — Real-time stock price, P/E, market cap, 52-week range, beta.
+- **Yahoo Finance MCP (`get_historical`)** — Historical OHLCV prices (up to max history). Use for 1Y price performance and beta context.
+- **Yahoo Finance MCP (`get_financials`)** — Income statement, balance sheet, cash flow (annual and quarterly). Use for revenue growth, margins, leverage, ROE, ROIC.
+- **Yahoo Finance MCP (`get_company_info`)** — Sector, industry, description, key statistics.
+- **Yahoo Finance MCP (`get_news`)** — Recent news headlines. Use for recent developments.
+- **FRED MCP (`fred_get_series`)** — Macroeconomic indicators. Use series: GDPC1 (US real GDP), CPIAUCSL (US CPI), UNRATE (unemployment rate), PPIACO (PMI proxy). Use to establish the economic backdrop.
+
+> **Note on analyst consensus:** `yfinance-mcp` does not expose analyst consensus estimates (EPS/Revenue forward estimates). For consensus data, use web search: "[TICKER] consensus EPS estimate [current quarter]".
 
 ## Tool Chaining Workflow
 
-1. **Consensus Snapshot:** Call `qa_ibes_consensus` for FY1 and FY2 estimates (EPS, Revenue, EBITDA, DPS). Note analyst count and dispersion.
-2. **Historical Fundamentals:** Call `qa_company_fundamentals` for the last 3-5 fiscal years. Extract revenue growth, margins, leverage, returns (ROE, ROIC).
-3. **Price Performance:** Call `qa_historical_equity_price` for 1Y history. Compute YTD return, 1Y return, 52-week range position, beta.
-4. **Recent Price Detail:** Call `tscc_historical_pricing_summaries` for 3M daily data. Assess volume trends and recent momentum.
-5. **Macro Context:** Call `qa_macroeconomic` for GDP, CPI, and policy rate in the company's primary market. Summarize whether macro is tailwind or headwind.
-6. **Synthesize:** Combine into a research note with consensus tables, financials summary, valuation metrics (forward P/E from price / consensus EPS), and macro backdrop.
+1. **Company Snapshot:** Call `get_quote` for real-time price, P/E, market cap, and 52-week range. Call `get_company_info` for sector, industry, and business description.
+2. **Historical Fundamentals:** Call `get_financials` with type "income" (annual) for the last 3–5 years. Extract revenue, gross profit, EBITDA, net income. Calculate margins and growth rates.
+3. **Balance Sheet & Returns:** Call `get_financials` with type "balance" to compute net debt, ROE (Net Income / Equity), and ROIC.
+4. **Price Performance:** Call `get_historical` with period "1y" and interval "1d". Compute YTD return, 1Y return, 52-week range position.
+5. **Consensus Estimates (web search fallback):** Search web for "[TICKER] consensus EPS revenue estimate [next fiscal year]". Note analyst count and estimate range.
+6. **Macro Context:** Call `fred_get_series` for GDP (GDPC1), CPI (CPIAUCSL), and unemployment (UNRATE). Summarize whether macro is tailwind or headwind for the sector.
+7. **Synthesize:** Combine into a research note with price stats, financials summary, valuation metrics (P/E from `get_quote`), and macro backdrop.
 
 ## Output Format
 

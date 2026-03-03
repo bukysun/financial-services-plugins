@@ -13,22 +13,21 @@ Always compute portfolio-level metrics as market-value weighted averages (yield,
 
 ## Available MCP Tools
 
-- **`bond_price`** — Price bonds. Returns clean/dirty price, yield, duration, convexity, DV01, spread. Accepts comma-separated identifiers for batch pricing.
-- **`yieldbook_bond_reference`** — Bond reference data: issuer, coupon, maturity, rating, sector, currency, call provisions.
-- **`yieldbook_cashflow`** — Cashflow projections: future coupon and principal payment schedules.
-- **`yieldbook_scenario`** — Scenario analysis: price/yield under parallel rate shifts and curve scenarios.
-- **`interest_rate_curve`** — Government yield curves. Use for spread-to-curve context and curve environment assessment.
-- **`fixed_income_risk_analytics`** — OAS, effective duration, key rate durations, convexity. Use for bonds with embedded options.
+- **FRED MCP (`fred_get_series`)** — Treasury yields at standard tenors (DTB3, DGS2, DGS5, DGS10, DGS30) for portfolio duration and convexity approximations. Also corporate bond spread indices for credit context.
+- **FRED MCP (`fred_search`)** — Search for additional rate or spread series.
+- **Yahoo Finance MCP (`get_quote`)** — Current price quotes for ETF holdings (e.g., AGG, LQD, TLT) or equity components in a mixed portfolio.
+- **Yahoo Finance MCP (`get_financials`)** — Fundamental data for corporate issuers where available.
+
+> **Note on YieldBook and cashflow analytics:** Institutional fixed income analytics (YieldBook, OAS, key rate durations, cashflow present value models) are not available from free sources. This skill uses yield-curve and duration-approximation methods instead. For full portfolio analytics, a Bloomberg or FactSet subscription is required.
 
 ## Tool Chaining Workflow
 
-1. **Price All Bonds:** Call `bond_price` for all holdings. Extract yield, duration, DV01, convexity, spread per bond.
-2. **Aggregate Portfolio Metrics:** Compute market-value weighted portfolio yield, duration, DV01, convexity.
-3. **Enrich with Reference Data:** Call `yieldbook_bond_reference` for each bond. Build sector, rating, maturity, and currency breakdowns.
-4. **Project Cashflows:** Call `yieldbook_cashflow` for the portfolio. Aggregate into a quarterly cashflow waterfall. Flag concentration periods.
-5. **Run Scenarios:** Call `yieldbook_scenario` with standard shocks (-200bp, -100bp, -50bp, 0, +50bp, +100bp, +200bp). Identify top risk contributors.
-6. **Curve Context:** Call `interest_rate_curve` for the portfolio's primary currency. Compute spread to curve for each bond.
-7. **Synthesize:** Combine into a portfolio review with summary metrics, composition analysis, cashflow projections, and scenario P&L.
+1. **Yield Curve Baseline:** Call `fred_get_series` for the full Treasury curve (DTB3, DGS2, DGS5, DGS10, DGS30). This is the risk-free baseline for portfolio valuation.
+2. **Portfolio Rate Sensitivity:** For each bond/ETF in the portfolio, estimate modified duration (from the bond's stated duration or ETF fact sheet). Compute DV01 = Modified Duration × Price × 0.01 for each position. Sum DV01s for portfolio rate sensitivity.
+3. **Key Rate Exposures:** Approximate key rate durations by bucketing holdings by maturity (0–2Y, 2–5Y, 5–10Y, 10Y+). Compute bucket DV01s to identify curve exposure.
+4. **Credit Spread Context:** For corporate bond holdings, call `fred_get_series` for the relevant ICE BofA spread index (BAMLC0A4CBBB for BBB, etc.). Assess current spread levels vs history.
+5. **Scenario Analysis:** Apply parallel rate shifts (±100bp, ±50bp) using duration approximation: ΔP ≈ −ModDuration × ΔY × Price + 0.5 × Convexity × (ΔY)². Compute P&L for each position and portfolio total.
+6. **Synthesize:** Present portfolio duration profile, key rate exposures, credit spread context, and scenario P&L table.
 
 ## Output Format
 

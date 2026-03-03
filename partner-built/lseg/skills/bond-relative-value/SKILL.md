@@ -13,21 +13,22 @@ Relative value is about whether a bond's spread adequately compensates for its r
 
 ## Available MCP Tools
 
-- **`bond_price`** — Price bonds. Returns clean/dirty price, yield, duration, convexity, DV01, Z-spread. Accepts ISIN, RIC, or CUSIP.
-- **`interest_rate_curve`** — Government and swap yield curves. Two-phase: list then calculate. Use to compute G-spreads.
-- **`credit_curve`** — Credit spread curves by issuer type. Two-phase: search by country/issuerType, then calculate. Use to isolate credit component.
-- **`yieldbook_scenario`** — Scenario analysis with parallel rate shifts. Returns price change and P&L under each scenario.
-- **`tscc_historical_pricing_summaries`** — Historical pricing data. Use for historical spread context and Z-score analysis.
-- **`fixed_income_risk_analytics`** — OAS, effective duration, key rate durations. Use for callable bonds and deeper risk decomposition.
+- **FRED MCP (`fred_get_series`)** — Government bond yields for G-spread calculation. Key series: DGS2, DGS5, DGS10, DGS30 (US Treasuries). Also corporate bond spread indices: BAMLC0A4CBBB (BBB OAS), BAMLC0A2CAA (AA OAS), BAMLH0A0HYM2 (High Yield OAS).
+- **FRED MCP (`fred_search`)** — Search for credit spread series, country-specific yield series, or other fixed income indicators.
+- **Yahoo Finance MCP (`get_quote`)** — For bonds available on Yahoo Finance (use ticker format like "^TNX" for 10Y Treasury yield). Not all corporate bonds available.
+- **Yahoo Finance MCP (`get_news`)** — Recent news for credit context.
+
+> **Note on institutional bond pricing:** Tools like `bond_price` (clean/dirty price from ISIN), OAS/Z-spread computation, `yieldbook_scenario`, and `credit_curve` are not available from free sources. This skill uses yield-curve-based approximations. For institutional-grade pricing, a Bloomberg or FactSet subscription is required.
 
 ## Tool Chaining Workflow
 
-1. **Price the Bond(s):** Call `bond_price` for target and any comparison bonds. Extract yield, Z-spread, duration, convexity, DV01.
-2. **Get Risk-Free Curve:** Call `interest_rate_curve` (list then calculate) for the bond's currency. Interpolate at bond maturity to compute G-spread.
-3. **Get Credit Curve:** Call `credit_curve` for the issuer's country and type. Extract credit spread at the bond's maturity. Compute residual spread = G-spread minus credit curve spread.
-4. **Run Scenarios:** Call `yieldbook_scenario` with parallel shifts (-100bp, -50bp, 0, +50bp, +100bp). Extract price changes and P&L per scenario.
-5. **Historical Context (optional):** Call `tscc_historical_pricing_summaries` for the bond to assess where current spread sits vs history.
-6. **Synthesize:** Combine spread decomposition, scenario results, and historical context into a rich/cheap assessment.
+1. **Get Risk-Free Curve:** Call `fred_get_series` for DGS2, DGS5, DGS10, DGS30. Interpolate to the bond's maturity tenor to get the risk-free yield (G-spread baseline).
+2. **Get Credit Spread Proxy:** Call `fred_get_series` for the appropriate ICE BofA spread index (e.g., BAMLC0A4CBBB for BBB). This is a sector-level credit spread proxy, not issuer-specific.
+3. **Estimate G-Spread:** If the bond's current yield is available (from web search or Yahoo Finance quote), compute G-spread = bond yield minus Treasury yield at matching maturity.
+4. **Estimate Spread Decomposition:** Residual spread = G-spread minus credit index spread. Positive residual = bond is cheap vs. sector; negative = rich.
+5. **Historical Context:** Call `fred_get_series` for the credit spread index with `observation_start` 2 years ago. Compute where current spread sits vs history (percentile).
+6. **Rate Scenario Analysis:** Using the current FRED Treasury curve, estimate price sensitivity using modified duration approximation: ΔP ≈ −Duration × ΔY × Price. Apply for ±50bp and ±100bp scenarios.
+7. **Synthesize:** Combine estimated spread decomposition, historical context, and rate scenarios into a rich/cheap assessment. Clearly note that pricing is estimated, not model-priced.
 
 ## Output Format
 

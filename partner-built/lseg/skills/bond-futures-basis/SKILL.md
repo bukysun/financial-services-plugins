@@ -13,20 +13,22 @@ The basis sits at the intersection of cash bond pricing, repo markets, and deliv
 
 ## Available MCP Tools
 
-- **`bond_future_price`** — Price bond futures. Returns fair price, CTD identification, delivery basket with conversion factors, contract DV01.
-- **`bond_price`** — Price individual cash bonds. Returns clean/dirty price, yield, duration, DV01, convexity.
-- **`interest_rate_curve`** — Government yield curves. Two-phase: list available curves, then calculate. Use short end as repo rate proxy.
-- **`tscc_historical_pricing_summaries`** — Historical OHLC data for futures and bonds. Use to track basis evolution over time.
-- **`credit_curve`** — Credit spread curves. Use for sovereign credit context when relevant.
+- **FRED MCP (`fred_get_series`)** — Treasury yields for CTD bond yield approximation and implied repo calculation. Key series: DGS2, DGS5, DGS10, DGS30.
+- **FRED MCP (`fred_search`)** — Search for repo rate series (e.g., SOFR, EFFR) for financing cost baseline.
+- **Yahoo Finance MCP (`get_quote`)** — Bond futures quotes where available on Yahoo Finance (e.g., "ZN=F" for 10Y T-note futures, "ZB=F" for 30Y T-bond futures).
+- **Yahoo Finance MCP (`get_historical`)** — Historical futures price data for basis trend analysis.
+
+> **Note on CTD identification:** Identifying the cheapest-to-deliver (CTD) bond requires live bond pricing data (ISIN/CUSIP prices) which is not available from free sources. CTD identification must rely on web search for current CME delivery basket data or dealer research.
 
 ## Tool Chaining Workflow
 
-1. **Price the Future:** Call `bond_future_price` with the contract RIC. Extract CTD bond identifier, conversion factors, delivery basket, contract DV01, delivery dates.
-2. **Price the CTD Bond:** Call `bond_price` for the CTD identified in step 1. Extract clean/dirty price, yield, duration, DV01.
-3. **Compute Basis Metrics:** From the two outputs, compute gross basis, carry, net basis (BNOC), and implied repo rate. Compare implied repo to market short-term rate.
-4. **Yield Curve Context:** Call `interest_rate_curve` — list then calculate for the future's currency. Use short-end rate as repo proxy for the implied repo comparison.
-5. **Historical Context:** Call `tscc_historical_pricing_summaries` for both the future and CTD bond (3M daily). Assess basis trend, volatility, and current percentile.
-6. **Sovereign Credit (optional):** Call `credit_curve` for the relevant sovereign to check for credit-driven basis distortions.
+1. **Futures Quote:** Call `get_quote` on Yahoo Finance for the futures contract (e.g., "ZN=F" for 10Y T-note futures). Get current futures price and contract specs.
+2. **CTD Identification (web search):** Search web for "[futures contract] CTD cheapest-to-deliver bond [current month]". Note the CTD CUSIP, coupon, maturity, and conversion factor.
+3. **Treasury Yield Baseline:** Call `fred_get_series` for the yield closest to the CTD maturity (DGS5, DGS10, etc.). Get current yield for basis calculation.
+4. **Repo Rate:** Call `fred_get_series` for SOFR (overnight repo proxy) and EFFR. Use the most relevant short-term rate as the financing cost.
+5. **Basis Calculation:** Basis (gross) = CTD price − (Futures price × Conversion factor). Implied repo rate = [(Forward price / Spot price) − 1] × (360 / days to delivery). Compare implied repo to SOFR to determine if basis is rich or cheap.
+6. **Historical Context:** Call `get_historical` for the futures contract to assess where the basis sits vs recent history.
+7. **Synthesize:** Present basis level, implied repo vs actual repo spread, and CTD analysis. Note data quality limitations from using approximated prices.
 
 ## Output Format
 
