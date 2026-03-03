@@ -1,8 +1,8 @@
 # Sector Seed Companies Reference
 
-When the user specifies a sector but not specific companies, use these seed lists to bootstrap the company universe. These are starting points — always expand via `get_competitors_from_identifiers` and validate with `get_info_from_identifiers`.
+When the user specifies a sector but not specific companies, use these seed lists to bootstrap the company universe. These are starting points — always expand via web search for additional sector companies and validate via Yahoo Finance MCP `get_company_info` (for public companies) or web search (for private companies).
 
-> **All seeds below have been validated against S&P Global's identifier system.** If a seed fails to resolve, try the alias listed in parentheses before dropping it.
+> **All seeds below are validated starting points.** If a seed's legal name differs from the brand name, the alias table at the bottom of this file lists the correct legal name for web searches and Yahoo Finance lookups.
 
 ## Technology / Software
 
@@ -64,7 +64,7 @@ Seeds: Discord, Reddit, Substack
 
 ⚠️ **Excluded (do not use as seeds):**
 - *BeReal* — Acquired by Voodoo (Jun 2024). Now a subsidiary.
-- *Lemon8* — The brand name "Lemon8" resolves in S&P Global to a small Dutch company (Lemon8 B.V.), **not** the ByteDance social media app. ByteDance's apps are subsidiaries and do not have independent funding rounds. Do not use.
+- *Lemon8* — The brand name "Lemon8" may return results for a small Dutch company (Lemon8 B.V.), **not** the ByteDance social media app. ByteDance's apps are subsidiaries and do not have independent funding rounds. Do not use.
 
 ## Industrials / Logistics
 
@@ -82,17 +82,17 @@ Seeds: SpaceX, Relativity Space, Rocket Lab, Planet Labs, Astra
 
 ## Identifier Alias Reference
 
-Some well-known brand names don't match S&P Global's legal entity names. If a brand name returns empty results from `get_info_from_identifiers`, try the alias:
+Some well-known brand names differ from their legal entity names. If a brand name returns no results from Yahoo Finance MCP or web search, try the legal entity alias:
 
-| Brand Name | S&P Global Legal Name | company_id |
-|---|---|---|
-| Together AI | Together Computer, Inc. | C_1860042219 |
-| Character.ai | Character Technologies, Inc. | C_1829047235 |
-| Runway ML | Runway AI, Inc. | C_633706980 |
-| Adept AI | Adept AI Labs Inc. | C_1780739313 |
-| xAI | X.AI LLC | C_1863863313 |
+| Brand Name | Legal Name |
+|---|---|
+| Together AI | Together Computer, Inc. |
+| Character.ai | Character Technologies, Inc. |
+| Runway ML | Runway AI, Inc. |
+| Adept AI | Adept AI Labs Inc. |
+| xAI | X.AI LLC |
 
-> **Tip:** When a brand name fails, try `get_info_from_identifiers` with the legal name. If that also fails, the company may not be indexed yet. As a last resort, use the `company_id` directly as the identifier.
+> **Tip:** When a brand name returns no results, try the legal entity name listed in the alias table above. If that also fails, try searching for the company on Crunchbase or in recent news articles.
 
 ## Notes
 
@@ -100,4 +100,4 @@ Some well-known brand names don't match S&P Global's legal entity names. If a br
 - For niche sub-sectors not listed here, ask the user for 2–3 example companies to use as seeds.
 - Always validate seeds are still active/relevant — companies pivot, merge, or shut down.
 - **Refresh cadence:** These seeds should be reviewed quarterly. AI sector seeds in particular change rapidly due to acquisitions and new entrants.
-- Seeds marked as subsidiaries or acquired will still resolve in `get_info_from_identifiers` (status = "Operating Subsidiary") but will return zero funding rounds. Skip these for funding queries.
+- Seeds marked as subsidiaries or acquired will have no independent funding rounds. Skip these for funding searches and note them as "acquired/subsidiary" context only.

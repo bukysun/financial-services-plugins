@@ -158,7 +158,7 @@ Use the specific industry identified earlier (e.g., "cloud infrastructure softwa
 If not available from the tools: "Comparable transaction data not available from data source." Do not fabricate precedent multiples.
 
 ### 7. Key Business Relationships
-Leverages S&P Capital IQ relationship data. Group by type:
+Leverages available relationship data from SEC EDGAR filings, Yahoo Finance company info, and web search. Group by type:
 
 **Customers:** Top 3-5 named clients
 **Suppliers:** Key vendors and technology providers
@@ -177,7 +177,7 @@ For PE-backed companies, name the sponsor, acquisition year, and ownership stake
 
 If ownership data is not returned by the tools, omit this section entirely rather than showing placeholders.
 
-**Do not include a Management Team table.** No S&P Global tool returns executive data — see Data Integrity Rule 10. Management names from training data will be stale.
+**Do not include a Management Team table.** Executive data from training knowledge will be stale — see Data Integrity Rule 10. If management names are needed, retrieve them from SEC EDGAR proxy filings (DEF 14A) and include the filing date.
 
 ## Page Budget & Cut Order
 

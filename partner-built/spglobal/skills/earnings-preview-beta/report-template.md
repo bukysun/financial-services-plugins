@@ -390,7 +390,7 @@ The report is a single self-contained HTML file with:
         <tr><td>[Company KPI 2]</td><td class="num">[Value]</td><td class="num">[Value]</td><td class="num [pos|neg]">[Change]</td></tr>
       </tbody>
     </table>
-    <div class="source">Source: Kensho, S&P Capital IQ</div>
+    <div class="source">Source: Yahoo Finance MCP & Web Search</div>
 
     <!-- Key Metrics Beyond Headline EPS -->
     <h3 class="subsection-title">Key Metrics Beyond Headline EPS</h3>
@@ -424,7 +424,7 @@ The report is a single self-contained HTML file with:
         <!-- 3-5 material items from last 60 days -->
       </ul>
     </div>
-    <div class="source">Source: Kensho</div>
+    <div class="source">Source: Web Search</div>
 
   </div>
 
@@ -440,14 +440,14 @@ The report is a single self-contained HTML file with:
       <div class="chart-container">
         <h4 class="figure-title">Figure 1: Quarterly Revenue & Diluted EPS</h4>
         <canvas id="chart-rev-eps"></canvas>
-        <div class="source">Source: S&P Capital IQ</div>
+        <div class="source">Source: Yahoo Finance MCP</div>
       </div>
 
       <!-- Figure 2: Margin Trends -->
       <div class="chart-container">
         <h4 class="figure-title">Figure 2: Margin Trends (Gross & Operating %)</h4>
         <canvas id="chart-margins"></canvas>
-        <div class="source">Source: S&P Capital IQ</div>
+        <div class="source">Source: Yahoo Finance MCP</div>
       </div>
     </div>
 
@@ -456,7 +456,7 @@ The report is a single self-contained HTML file with:
       <div class="chart-container chart-full">
         <h4 class="figure-title">Figure 3: Revenue Growth y/y (%)</h4>
         <canvas id="chart-rev-growth" style="max-height: 200px;"></canvas>
-        <div class="source">Source: S&P Capital IQ</div>
+        <div class="source">Source: Yahoo Finance MCP</div>
       </div>
     </div>
 
@@ -475,7 +475,7 @@ The report is a single self-contained HTML file with:
         <!-- Populate from segment data. Color-code y/y change with pos/neg classes. -->
       </tbody>
     </table>
-    <div class="source">Source: S&P Capital IQ</div>
+    <div class="source">Source: Yahoo Finance MCP</div>
   </div>
 
   <!-- Page break for stock & competitor charts -->
@@ -486,7 +486,7 @@ The report is a single self-contained HTML file with:
       <div class="chart-container chart-full">
         <h4 class="figure-title">Figure 5: 1-Year Stock Price with Earnings Dates</h4>
         <canvas id="chart-price-annotated" style="max-height: 300px;"></canvas>
-        <div class="source">Source: S&P Capital IQ</div>
+        <div class="source">Source: Yahoo Finance MCP</div>
       </div>
     </div>
 
@@ -495,7 +495,7 @@ The report is a single self-contained HTML file with:
       <div class="chart-container chart-full">
         <h4 class="figure-title">Figure 6: Stock Performance vs. Competitors — 1 Year (Indexed to 100)</h4>
         <canvas id="chart-comp-perf" style="max-height: 300px;"></canvas>
-        <div class="source">Source: S&P Capital IQ</div>
+        <div class="source">Source: Yahoo Finance MCP</div>
       </div>
     </div>
   </div>
@@ -507,7 +507,7 @@ The report is a single self-contained HTML file with:
       <div class="chart-container chart-full">
         <h4 class="figure-title">Figure 7: LTM P/E vs. Competitors</h4>
         <canvas id="chart-pe-comp" style="max-height: 280px;"></canvas>
-        <div class="source">Source: S&P Capital IQ</div>
+        <div class="source">Source: Yahoo Finance MCP</div>
       </div>
     </div>
 
@@ -529,7 +529,7 @@ The report is a single self-contained HTML file with:
         <!-- Highlight the subject company row with class="highlight-row" -->
       </tbody>
     </table>
-    <div class="source">Source: S&P Capital IQ</div>
+    <div class="source">Source: Yahoo Finance MCP</div>
   </div>
 
   <!-- ════════════════════════════════════════════ -->
@@ -558,7 +558,7 @@ The report is a single self-contained HTML file with:
           <td>[Q# FY#### Revenue]</td>
           <td class="num">$[XX.X]B</td>
           <td class="source-detail">
-            <span class="src-label">S&P Capital IQ</span> — get_financial_line_item_from_identifiers(identifier='[TICKER]', line_item='revenue', period_type='quarterly', period='[Q# FY####]')
+            <span class="src-label">Yahoo Finance MCP</span> — get_financials(ticker='[TICKER]', type='income', period='quarterly') — [Q# FY####] revenue
           </td>
         </tr>
         <tr id="ref-2">
@@ -566,7 +566,7 @@ The report is a single self-contained HTML file with:
           <td>[Q# FY#### Diluted EPS]</td>
           <td class="num">$[X.XX]</td>
           <td class="source-detail">
-            <span class="src-label">S&P Capital IQ</span> — get_financial_line_item_from_identifiers(identifier='[TICKER]', line_item='diluted_eps', period_type='quarterly', period='[Q# FY####]')
+            <span class="src-label">Yahoo Finance MCP</span> — get_financials(ticker='[TICKER]', type='income', period='quarterly') — [Q# FY####] diluted_eps
           </td>
         </tr>
         <tr id="ref-3">
@@ -574,7 +574,7 @@ The report is a single self-contained HTML file with:
           <td>[Q# FY#### Gross Profit]</td>
           <td class="num">$[XX.X]B</td>
           <td class="source-detail">
-            <span class="src-label">S&P Capital IQ</span> — get_financial_line_item_from_identifiers(identifier='[TICKER]', line_item='gross_profit', period_type='quarterly', period='[Q# FY####]')
+            <span class="src-label">Yahoo Finance MCP</span> — get_financials(ticker='[TICKER]', type='income', period='quarterly') — [Q# FY####] gross_profit
           </td>
         </tr>
         <tr id="ref-4">
@@ -583,7 +583,7 @@ The report is a single self-contained HTML file with:
           <td class="num">[XX.X%]</td>
           <td class="source-detail">
             <span class="formula"><a href="#ref-3" class="data-ref">Gross Profit $XX.XB</a> / <a href="#ref-1" class="data-ref">Revenue $XX.XB</a> = XX.X%</span><br>
-            <span class="src-label">S&P Capital IQ</span> (calculated)
+            <span class="src-label">Yahoo Finance MCP</span> (calculated)
           </td>
         </tr>
         <tr id="ref-5">
@@ -592,7 +592,7 @@ The report is a single self-contained HTML file with:
           <td class="num">[+/-X.X%]</td>
           <td class="source-detail">
             <span class="formula">(<a href="#ref-1" class="data-ref">[Q# FY## Rev $XX.XB]</a> - <a href="#ref-N" class="data-ref">[Q# FY## Rev $XX.XB]</a>) / <a href="#ref-N" class="data-ref">[Q# FY## Rev $XX.XB]</a> = X.X%</span><br>
-            <span class="src-label">S&P Capital IQ</span> (calculated)
+            <span class="src-label">Yahoo Finance MCP</span> (calculated)
           </td>
         </tr>
         <!-- Continue for all financial data points... -->
@@ -604,7 +604,7 @@ The report is a single self-contained HTML file with:
           <td>Current Stock Price — [TICKER]</td>
           <td class="num">$[XXX.XX]</td>
           <td class="source-detail">
-            <span class="src-label">S&P Capital IQ</span> — get_prices_from_identifiers(identifier='[TICKER]', periodicity='day')
+            <span class="src-label">Yahoo Finance MCP</span> — get_historical(ticker='[TICKER]', period='1y', interval='1d')
           </td>
         </tr>
         <tr id="ref-N">
@@ -612,7 +612,7 @@ The report is a single self-contained HTML file with:
           <td>Market Cap — [TICKER]</td>
           <td class="num">$[XXX.X]B</td>
           <td class="source-detail">
-            <span class="src-label">S&P Capital IQ</span> — get_capitalization_from_identifiers(identifier='[TICKER]', capitalization='market_cap')
+            <span class="src-label">Yahoo Finance MCP</span> — get_quote(ticker='[TICKER]') — market_cap
           </td>
         </tr>
         <tr id="ref-N">
@@ -621,7 +621,7 @@ The report is a single self-contained HTML file with:
           <td class="num">[XX.X]x</td>
           <td class="source-detail">
             <span class="formula"><a href="#ref-20" class="data-ref">Price $XXX.XX</a> / (<a href="#ref-8" class="data-ref">Q1 EPS $X.XX</a> + <a href="#ref-9" class="data-ref">Q2 EPS $X.XX</a> + <a href="#ref-10" class="data-ref">Q3 EPS $X.XX</a> + <a href="#ref-11" class="data-ref">Q4 EPS $X.XX</a>) = XX.Xx</span><br>
-            <span class="src-label">S&P Capital IQ</span> (calculated)
+            <span class="src-label">Yahoo Finance MCP</span> (calculated)
           </td>
         </tr>
         <tr id="ref-N">
@@ -630,7 +630,7 @@ The report is a single self-contained HTML file with:
           <td class="num">[XX.X]x</td>
           <td class="source-detail">
             <span class="formula"><a href="#ref-20" class="data-ref">Price $XXX.XX</a> / (<a href="#ref-N" class="data-ref">Q4'25E $X.XX</a> + <a href="#ref-N" class="data-ref">Q1'26E $X.XX</a> + <a href="#ref-N" class="data-ref">Q2'26E $X.XX</a> + <a href="#ref-N" class="data-ref">Q3'26E $X.XX</a>) = XX.Xx</span><br>
-            <span class="src-label">S&P Capital IQ</span> — get_consensus_estimates_from_identifiers(identifier='[TICKER]', period_type='quarterly', num_periods_forward=4). NTM EPS = sum of next 4 quarterly consensus mean EPS estimates.
+            <span class="src-label">Web Search</span> — web_search('[TICKER] consensus EPS estimates next 4 quarters'). NTM EPS = sum of next 4 quarterly consensus mean EPS estimates.
           </td>
         </tr>
 
@@ -680,7 +680,7 @@ The report is a single self-contained HTML file with:
           <td class="num">[+/-X.X%]</td>
           <td class="source-detail">
             <span class="formula">(<a href="#ref-N" class="data-ref">Current $XXX.XX</a> - <a href="#ref-N" class="data-ref">Dec 31 Close $XXX.XX</a>) / <a href="#ref-N" class="data-ref">Dec 31 Close $XXX.XX</a> = X.X%</span><br>
-            <span class="src-label">S&P Capital IQ</span> (calculated from daily prices)
+            <span class="src-label">Yahoo Finance MCP</span> (calculated from daily prices via get_historical)
           </td>
         </tr>
       </tbody>
@@ -692,7 +692,7 @@ The report is a single self-contained HTML file with:
   <!-- ════════════════════════════════════════════ -->
   <div class="page-footer">
     <div class="footer-disclaimer">Analysis is AI-generated — please confirm all outputs</div>
-    <div class="footer-meta">Data: S&P Capital IQ, Kensho | [Month Day, Year]</div>
+    <div class="footer-meta">Data: Yahoo Finance MCP & Web Search | [Month Day, Year]</div>
   </div>
 
 </div>
@@ -1158,7 +1158,7 @@ try {
 ### Figure Labels
 - Number all figures sequentially: "Figure 1:", "Figure 2:", etc.
 - Figures 1-8 are on Pages 3-5 (the Consensus Estimates table on Page 2 is not numbered)
-- Include source attribution under every chart and table: "Source: S&P Capital IQ"
+- Include source attribution under every chart and table: "Source: Yahoo Finance MCP"
 
 ### Hyperlinked Claims
 - Every factual claim in the report body — numbers AND qualitative statements — must be wrapped in `<a href="#ref-N" class="data-ref">CLAIM TEXT</a>`
@@ -1178,10 +1178,10 @@ try {
 - Group rows by category: Quarterly Financials, Valuation, Transcript Claims, Estimates & Consensus, News & Analyst Commentary, Stock Performance
 - Use subheading rows (`appendix-group` class) to separate groups
 - **Source & Derivation column** must include specific, detailed sourcing for EVERY row:
-  - For raw S&P data (revenue, EPS, prices, market cap, etc.): `<span class="src-label">S&P Capital IQ</span>` followed by the specific MCP function call with parameters (e.g., `get_financial_line_item_from_identifiers(identifier='WMT', line_item='revenue', period_type='quarterly', period='Q3 FY2026')`). **Never write just "S&P Capital IQ" with no detail.**
+  - For raw financial data (revenue, EPS, prices, market cap, etc.): `<span class="src-label">Yahoo Finance MCP</span>` followed by the specific tool call with parameters (e.g., `get_financials(ticker='WMT', type='income', period='quarterly') — Q3 FY2026 revenue`). **Never write just "Yahoo Finance MCP" with no detail.**
   - For calculated values (margins, growth rates, P/E, returns): the full formula with `<a class="data-ref">` hyperlinks to each component row (use `formula` CSS class). **Every number in the formula must be a clickable link to its own appendix row.**
-  - For transcript claims: the verbatim excerpt sentence in italics (`excerpt` CSS class) + transcript name with `transcript-ref` class + `key_dev_id`
-  - For Kensho results: the key finding (`excerpt` class) + **clickable source URL** as `<a href="[URL]" target="_blank" class="src-url">[Source Title]</a>` + the search query used. **Every Kensho-sourced claim must have a clickable URL to the original source.**
+  - For transcript claims: the verbatim excerpt sentence in italics (`excerpt` CSS class) + transcript name with `transcript-ref` class + source URL where transcript was retrieved.
+  - For web search results: the key finding (`excerpt` class) + **clickable source URL** as `<a href="[URL]" target="_blank" class="src-url">[Source Title]</a>` + the search query used. **Every web-search-sourced claim must have a clickable URL to the original source.**
 - Source labels use the `src-label` CSS class (bold navy)
 - External source URLs use the `src-url` CSS class (blue, underlined, clickable)
 

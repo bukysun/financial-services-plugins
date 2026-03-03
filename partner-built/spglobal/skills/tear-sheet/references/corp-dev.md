@@ -90,7 +90,7 @@ Below the segment table (or in place of it if segments aren't available), write 
 Customer concentration is the single most important signal here — if the tools return any data on top customers or revenue concentration, highlight it prominently. If data is sparse, write what you can infer from the business description and relationships. Keep this to 2-3 sentences — it's context for the segment table, not a standalone analysis.
 
 ### 4. Strategic Fit Analysis
-**This is the signature section of the Corp Dev tear sheet.** It is required — do not skip or compress it. It uses the Business Relationships data from S&P Capital IQ to map overlaps and complements.
+**This is the signature section of the Corp Dev tear sheet.** It is required — do not skip or compress it. It uses available business relationship data (from SEC EDGAR filings, Yahoo Finance company info, or web search) to map overlaps and complements.
 
 Organize as three buckets. **Each bucket must be 2-3 sentences of analytical reasoning, not a list of company names.** Listing "Customers: Microsoft, JPMorgan, Google" without context is useless. Instead, explain *what the overlap or complement means* for an acquisition.
 
@@ -168,7 +168,7 @@ For private companies, skip trading multiples. Precedent transactions (data perm
 ### 7. Ownership Snapshot (data permitting — omit if tools return nothing)
 If the tools return ownership data, include a compact block: founder/family control %, PE sponsor details, institutional concentration. Ownership structure directly impacts deal complexity and is relevant for integration considerations.
 
-**Do not include a Management Team table.** No S&P Global tool returns executive data — see Data Integrity Rule 10. Management names from training data will be stale.
+**Do not include a Management Team table.** Executive data from training knowledge will be stale — see Data Integrity Rule 10. If management names are needed, retrieve them from SEC EDGAR proxy filings (DEF 14A) and include the filing date.
 
 ### 8. Integration Considerations
 **Required section — do not cut.** This is the analytical capstone of the Corp Dev tear sheet. Synthesized observations drawn from everything above. 3-4 substantive bullets:
