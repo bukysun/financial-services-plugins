@@ -11,7 +11,7 @@ The skills in this plugin are provided as-is. Generated outputs and data are not
 ## Skills Contained
 
 ### Tearsheets
-**Requires**: [S&P Global LLM-ready API](https://www.marketplace.spglobal.com/en/solutions/kensho-llm-ready-api-%28a156fe9f-5564-4f60-a624-95d8645dc98f%29) subscription
+**Requires**: Free Yahoo Finance MCP and SEC EDGAR MCP (no subscription needed)
 
 Generates a formatted, one-to-two page company tearsheet as a Word document, populated with live data from S&P Capital IQ. Supports four audience types, each optimized for a different use case:
 * Equity Research: Investment thesis snapshot for buy-side/sell-side analysts
@@ -22,23 +22,21 @@ Generates a formatted, one-to-two page company tearsheet as a Word document, pop
 **Example prompt**: "Generate a business development tearsheet for Palantir."
 
 ### Industry Transaction Summaries
-**Requires**: [S&P Global LLM-ready API](https://www.marketplace.spglobal.com/en/solutions/kensho-llm-ready-api-%28a156fe9f-5564-4f60-a624-95d8645dc98f%29) subscription
+**Requires**: Free Yahoo Finance MCP and SEC EDGAR MCP (no subscription needed)
 
 Summarizes recent M&A and deal activity within a sector or for a specific company, drawing on S&P Capital IQ transaction data. Useful for market mapping, pitch preparation, and competitive intelligence.
 
 **Example prompt**: "Summarize recent transactions in the data infrastructure space”
 
 ### Earnings Previews
-**Requires**: [S&P Global LLM-ready API](https://www.marketplace.spglobal.com/en/solutions/kensho-llm-ready-api-%28a156fe9f-5564-4f60-a624-95d8645dc98f%29) subscription
+**Requires**: Free Yahoo Finance MCP and SEC EDGAR MCP (no subscription needed)
 
 Generates a structured earnings preview for an upcoming report, including consensus estimates, recent guidance, analyst sentiment, and key things to watch — all sourced from S&P Capital IQ.
 
 **Example prompt**: "Give me an earnings preview for Salesforce."
 
 ## How to Use
-The plugin and skills require access to S&P Global data to work with, either [Capital IQ Pro](https://www.spglobal.com/market-intelligence/en/solutions/products/sp-capital-iq-pro) or [S&P Global LLM-ready API](https://www.marketplace.spglobal.com/en/solutions/kensho-llm-ready-api-%28a156fe9f-5564-4f60-a624-95d8645dc98f%29) subscriptions. 
-
-The LLM-ready API is easy to integrate in Claude or other applications via its MCP server. Follow [these steps](docs.kensho.com/llmreadyapi/mcp/third-party/claude) to set it up. 
+The plugin uses free data sources: **Yahoo Finance MCP** (no API key required) and **SEC EDGAR MCP** (no API key required). These are configured automatically in `.mcp.json` when you install the plugin.
 
 ### In Cowork
 You'll need a paid Claude plan (Pro, Max, Team, or Enterprise) and the Claude Desktop app for macOS or Windows.
