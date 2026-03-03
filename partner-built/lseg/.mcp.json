@@ -1,8 +1,17 @@
 {
   "mcpServers": {
-    "lseg": {
-      "type": "http",
-      "url": "https://api.analytics.lseg.com/lfa/mcp/server-cl"
+    "fred": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "fred-mcp-server"],
+      "env": {
+        "FRED_API_KEY": "<your-free-key-from-fred.stlouisfed.org>"
+      }
+    },
+    "yahoo-finance": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "yfinance-mcp"]
     }
   }
 }
