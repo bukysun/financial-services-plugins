@@ -5,7 +5,7 @@
       "command": "npx",
       "args": ["-y", "fred-mcp-server"],
       "env": {
-        "FRED_API_KEY": "<your-free-key-from-fred.stlouisfed.org>"
+        "FRED_API_KEY": "bfd5cf73039b0d3a30758debe71b7649"
       }
     },
     "yahoo-finance": {
