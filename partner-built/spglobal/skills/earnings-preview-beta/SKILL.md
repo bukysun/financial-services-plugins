@@ -7,17 +7,18 @@ description: Generate a concise 4-5 page equity research earnings preview for a 
 
 Generate a concise, professional equity research earnings preview for a single company. The output is a self-contained HTML file targeting 4-5 printed pages. The report is dense with figures and data, with tight narrative that gets straight to the point.
 
-**Data Sources (ZERO EXCEPTIONS):** The ONLY permitted data sources are **Kensho Grounding MCP** (`search`) and **S&P Global MCP** (`kfinance`). Absolutely NO other tools, data sources, or web access of any kind. Specifically:
-- Do NOT use `WebSearch`, `WebFetch`, `web_search`, `brave_search`, `google_search`, or ANY generic web/internet search tool — even if Kensho is slow, returns no results, or is temporarily unavailable.
-- Do NOT use any browser, URL fetch, or web scraping tool.
-- If Kensho Grounding returns no results for a query, try rephrasing the query or note "data not available" in the report. **NEVER fall back to web search as an alternative.**
-- Every piece of information in the report must be traceable to either a `kfinance` MCP function call or a Kensho `search` call. If it cannot be sourced to one of these two, it must not appear in the report.
+**Data Sources:** The primary data sources are **Yahoo Finance MCP** and **SEC EDGAR MCP**. Web search is permitted for news, analyst ratings, earnings transcripts, and any data not available from these MCPs. Specifically:
+- Use **Yahoo Finance MCP** for: stock prices, EPS history, market cap, company info, financials (income statement, balance sheet), earnings dates, competitors.
+- Use **SEC EDGAR MCP** for: official filing-based financials, segment disclosures, 10-Q/10-K data.
+- Use **web search** for: consensus estimates, analyst ratings, earnings call transcripts, recent news, and any data not returned by the above MCPs.
+- Do NOT use training knowledge for financial figures — it may be stale. All data must be sourced from one of the above three sources.
+- Every piece of information in the report must be labeled with its source (Yahoo Finance MCP, SEC EDGAR MCP, or Web search).
 
 **Critical Rule:** You MUST complete ALL research and data collection (Phases 1-5) BEFORE writing any part of the report.
 
 **Intermediate File Rule:** All raw data from MCP tool calls MUST be written to files in `/tmp/earnings-preview/` **immediately after each tool call returns** — before moving to the next call. This protects data from context window compression. Do NOT hold data only in memory. At the start of Phase 1, run `mkdir -p /tmp/earnings-preview` to create the directory. **Before generating the HTML report (Phase 7), you MUST read ALL intermediate files back into context using `cat` commands. The files — not your memory of earlier conversation — are the single source of truth for every number, quote, and source URL in the report. If you skip reading the files, the report WILL contain errors.**
 
-**Fiscal Quarter Rule:** NEVER infer the fiscal quarter from the calendar report date. Many companies have non-standard fiscal years (e.g., Walmart's FY ends Jan 31, so a Feb 2026 report covers Q4 FY2026, not Q4 2025 or Q1 2026). Always use the fiscal quarter and fiscal year exactly as stated in the earnings call name returned by `get_next_earnings_from_identifiers` or `get_earnings_from_identifiers` (e.g., "Walmart Q4 FY2026 Earnings Call" means the quarter is Q4 FY2026). Use that verbatim in the report title, headers, tables, and all references. If the call name is ambiguous, cross-reference with `get_financial_line_item_from_identifiers` period labels.
+**Fiscal Quarter Rule:** NEVER infer the fiscal quarter from the calendar report date. Many companies have non-standard fiscal years (e.g., Walmart's FY ends Jan 31, so a Feb 2026 report covers Q4 FY2026, not Q4 2025 or Q1 2026). Always use the fiscal quarter and fiscal year exactly as stated in the earnings call name returned by web search or Yahoo Finance MCP earnings date data (e.g., "Walmart Q4 FY2026 Earnings Call" means the quarter is Q4 FY2026). Use that verbatim in the report title, headers, tables, and all references. If the call name is ambiguous, cross-reference with Yahoo Finance MCP `get_financials` period labels.
 
 **Length Rule:** The report must be concise. Target 4-5 pages when printed. Do NOT write long multi-paragraph narratives. Use tight, punchy bullet points. Every sentence must earn its place. If you can say it in fewer words, do so.
 
@@ -25,9 +26,9 @@ Generate a concise, professional equity research earnings preview for a single c
 
 **Calculation Integrity Rule:** For any multi-step calculation (implied quarterly figures from annual guidance, LTM P/E, y/y growth rates, segment y/y changes), write out each step explicitly and verify intermediate results before using them in the next step. If you state A + B + C = X, verify X is arithmetically correct before using X in a subsequent formula. If the appendix shows a sum that does not equal its stated components, the report is wrong. When in doubt, recompute from raw data rather than reusing a previously calculated intermediate.
 
-**Ratio Nomenclature Rule:** All valuation ratios must be explicitly labeled as **LTM** (Last Twelve Months) or **NTM** (Next Twelve Months). Never use "trailing" or "forward" — always use LTM or NTM. LTM ratios use the sum of the most recent 4 reported quarters. NTM ratios use the **sum of the next 4 quarterly consensus mean EPS estimates** from `get_consensus_estimates_from_identifiers` — NOT a single annual figure. Both LTM and NTM P/E must be computed and displayed in the competitor comparison table.
+**Ratio Nomenclature Rule:** All valuation ratios must be explicitly labeled as **LTM** (Last Twelve Months) or **NTM** (Next Twelve Months). Never use "trailing" or "forward" — always use LTM or NTM. LTM ratios use the sum of the most recent 4 reported quarters. NTM ratios use the **sum of the next 4 quarterly consensus mean EPS estimates** from web search — NOT a single annual figure. Both LTM and NTM P/E must be computed and displayed in the competitor comparison table.
 
-**Hyperlink Rule (STRICTLY ENFORCED):** Every claim in the report — numeric AND non-numeric — MUST be wrapped in an `<a href="#ref-N" class="data-ref">` hyperlink pointing to the corresponding entry in the Appendix. **This is not optional. Every single number in the report must be a clickable link.** This includes: revenue figures, EPS, margins, growth rates, market caps, P/E ratios, stock returns, price targets, segment revenue, and any other financial metric. It also includes qualitative claims from transcripts or Kensho searches. If you state it as fact, it must link to a source. Assign each unique claim a sequential reference ID (`ref-1`, `ref-2`, etc.). The hyperlink style is subtle — navy color, no underline, dotted underline on hover. **Do NOT write any number in the report body without wrapping it in an `<a>` tag.** Example: write `<a href="#ref-1" class="data-ref">$152.3B</a>`, NEVER write `$152.3B` as plain text.
+**Hyperlink Rule (STRICTLY ENFORCED):** Every claim in the report — numeric AND non-numeric — MUST be wrapped in an `<a href="#ref-N" class="data-ref">` hyperlink pointing to the corresponding entry in the Appendix. **This is not optional. Every single number in the report must be a clickable link.** This includes: revenue figures, EPS, margins, growth rates, market caps, P/E ratios, stock returns, price targets, segment revenue, and any other financial metric. It also includes qualitative claims from transcripts or web search results. If you state it as fact, it must link to a source. Assign each unique claim a sequential reference ID (`ref-1`, `ref-2`, etc.). The hyperlink style is subtle — navy color, no underline, dotted underline on hover. **Do NOT write any number in the report body without wrapping it in an `<a>` tag.** Example: write `<a href="#ref-1" class="data-ref">$152.3B</a>`, NEVER write `$152.3B` as plain text.
 
 ---
 
@@ -35,10 +36,9 @@ Generate a concise, professional equity research earnings preview for a single c
 
 1. Parse the single company ticker from `$ARGUMENTS` (strip whitespace).
 2. Run `mkdir -p /tmp/earnings-preview` to create the working directory.
-3. Call `get_latest()` to establish current reporting period context.
-4. Call `get_info_from_identifiers` — record market cap, industry.
-5. Call `get_company_summary_from_identifiers` — record business description.
-6. Call `get_next_earnings_from_identifiers` — record upcoming earnings date and fiscal quarter name.
+3. Call Yahoo Finance MCP `get_company_info` — record sector, industry, business description.
+4. Call Yahoo Finance MCP `get_quote` — record market cap, current price.
+5. Search web for "[TICKER] next earnings date" — record upcoming earnings date and fiscal quarter.
 
 **Immediately write** `/tmp/earnings-preview/company-info.txt`:
 ```
@@ -55,13 +55,13 @@ BUSINESS_DESCRIPTION: [2-3 sentence summary]
 
 ## Phase 2: Earnings Transcript Analysis (MANDATORY — COMPLETE BEFORE WRITING)
 
-1. Call `get_latest_earnings_from_identifiers` to get the most recent completed earnings call `key_dev_id`.
-2. Call `get_transcript_from_key_dev_id` for that transcript.
+1. Search web for "[TICKER] [company name] most recent earnings call transcript [year]" to find the latest completed earnings transcript.
+2. Search web for the full transcript or key excerpts.
 3. **Immediately write** `/tmp/earnings-preview/transcript-extracts.txt` with the following sections. Write this file WHILE you still have the transcript in context — do not wait:
 
 ```
 TRANSCRIPT_SOURCE: [Call Name, e.g., "Q3 2025 Earnings Call"]
-KEY_DEV_ID: [key_dev_id]
+SOURCE_URL: [URL of transcript source]
 CALL_DATE: [date]
 FISCAL_QUARTER: [Q# FY####]
 
@@ -110,53 +110,53 @@ CONTEXT_4: [context]
 
 ## Phase 3: Competitor Analysis
 
-1. Call `get_competitors_from_identifiers` with `competitor_source="all"`.
+1. Call Yahoo Finance MCP `get_company_info` — look for competitors list. If not available, search web for "[TICKER] main competitors public companies".
 2. Select **top 5-7 most relevant public competitors**.
 3. For the company AND all selected competitors, gather:
-   - `get_prices_from_identifiers` with `periodicity="day"`, last 12 months
-   - `get_financial_line_item_from_identifiers` for `diluted_eps`, `period_type="quarterly"`, `num_periods=8`
-   - `get_capitalization_from_identifiers` with `capitalization="market_cap"` (latest)
-   - `get_consensus_estimates_from_identifiers` with `period_type="quarterly"`, `num_periods_forward=4` — this returns consensus mean EPS estimates for the next 4 quarters, which are summed to compute NTM EPS
+   - Yahoo Finance MCP `get_historical` with period "1y", interval "1d"
+   - Yahoo Finance MCP `get_financials` type "income" period "quarterly" — extract `diluted_eps` for last 8 quarters
+   - Yahoo Finance MCP `get_quote` — market cap field (latest)
+   - Web search "[TICKER] consensus EPS estimates next 4 quarters" — this returns consensus mean EPS estimates for the next 4 quarters, which are summed to compute NTM EPS
 
 **After each tool call returns, immediately append the raw data to the appropriate intermediate file:**
 
-**Write** `/tmp/earnings-preview/prices.csv` — one row per (ticker, date, close). Include the `source` column with the exact MCP function call. Write the subject company's prices first, then each competitor's as you fetch them:
+**Write** `/tmp/earnings-preview/prices.csv` — one row per (ticker, date, close). Include the `source` column with the data source. Write the subject company's prices first, then each competitor's as you fetch them:
 ```
 ticker,date,close,source
-D,2025-02-19,55.67,get_prices_from_identifiers(identifier='D',periodicity='day')
-D,2025-02-20,55.82,get_prices_from_identifiers(identifier='D',periodicity='day')
+D,2025-02-19,55.67,get_historical(ticker='D',period='1y',interval='1d')
+D,2025-02-20,55.82,get_historical(ticker='D',period='1y',interval='1d')
 ...
-DUK,2025-02-19,111.79,get_prices_from_identifiers(identifier='DUK',periodicity='day')
+DUK,2025-02-19,111.79,get_historical(ticker='DUK',period='1y',interval='1d')
 ...
 ```
 Note: the `source` value is the same for all rows from a single call — write it on every row so it's always available.
 
-**Write** `/tmp/earnings-preview/peer-eps.csv` — one row per (ticker, period, eps). Write immediately after each `diluted_eps` call:
+**Write** `/tmp/earnings-preview/peer-eps.csv` — one row per (ticker, period, eps). Write immediately after each financials call:
 ```
 ticker,period,diluted_eps,source
-D,Q4 2024,1.09,get_financial_line_item_from_identifiers(identifier='D',line_item='diluted_eps',period_type='quarterly')
-D,Q1 2025,-0.11,get_financial_line_item_from_identifiers(identifier='D',line_item='diluted_eps',period_type='quarterly')
+D,Q4 2024,1.09,get_financials(ticker='D',type='income',period='quarterly')
+D,Q1 2025,-0.11,get_financials(ticker='D',type='income',period='quarterly')
 ...
-DUK,Q4 2024,1.52,get_financial_line_item_from_identifiers(identifier='DUK',line_item='diluted_eps',period_type='quarterly')
+DUK,Q4 2024,1.52,get_financials(ticker='DUK',type='income',period='quarterly')
 ...
 ```
 
-**Write** `/tmp/earnings-preview/peer-market-caps.csv` — one row per ticker. Write immediately after each `market_cap` call:
+**Write** `/tmp/earnings-preview/peer-market-caps.csv` — one row per ticker. Write immediately after each quote call:
 ```
 ticker,market_cap,retrieval_date,source
-D,55900000000,2026-02-19,get_capitalization_from_identifiers(identifier='D',capitalization='market_cap')
-DUK,98300000000,2026-02-19,get_capitalization_from_identifiers(identifier='DUK',capitalization='market_cap')
+D,55900000000,2026-02-19,get_quote(ticker='D')
+DUK,98300000000,2026-02-19,get_quote(ticker='DUK')
 ...
 ```
 
-**Write** `/tmp/earnings-preview/consensus-eps.csv` — one row per (ticker, period, consensus mean EPS). Write immediately after each `get_consensus_estimates_from_identifiers` call:
+**Write** `/tmp/earnings-preview/consensus-eps.csv` — one row per (ticker, period, consensus mean EPS). Write immediately after each web search for consensus estimates:
 ```
 ticker,period,consensus_mean_eps,num_estimates,source
-D,Q4 2025,0.88,12,get_consensus_estimates_from_identifiers(identifier='D',period_type='quarterly',num_periods_forward=4)
-D,Q1 2026,0.72,10,get_consensus_estimates_from_identifiers(identifier='D',period_type='quarterly',num_periods_forward=4)
-D,Q2 2026,0.91,9,get_consensus_estimates_from_identifiers(identifier='D',period_type='quarterly',num_periods_forward=4)
-D,Q3 2026,1.05,8,get_consensus_estimates_from_identifiers(identifier='D',period_type='quarterly',num_periods_forward=4)
-DUK,Q4 2025,1.48,14,get_consensus_estimates_from_identifiers(identifier='DUK',period_type='quarterly',num_periods_forward=4)
+D,Q4 2025,0.88,12,web_search("D consensus EPS estimates next 4 quarters")
+D,Q1 2026,0.72,10,web_search("D consensus EPS estimates next 4 quarters")
+D,Q2 2026,0.91,9,web_search("D consensus EPS estimates next 4 quarters")
+D,Q3 2026,1.05,8,web_search("D consensus EPS estimates next 4 quarters")
+DUK,Q4 2025,1.48,14,web_search("DUK consensus EPS estimates next 4 quarters")
 ...
 ```
 
@@ -164,19 +164,19 @@ DUK,Q4 2025,1.48,14,get_consensus_estimates_from_identifiers(identifier='DUK',pe
 
 **Date Consistency Rule (stock returns):** When computing comparative stock returns (YTD %, 1-yr %, 30d %, 90d %), ALL tickers MUST use the **exact same start and end dates**. After writing all price data to `prices.csv`, identify the first trading date that appears in ALL tickers' data and use that as the common base date. Do NOT use different base dates for different tickers (e.g., the subject from Feb 19 and peers from Feb 28). If a ticker's data starts later than others, use the first overlapping date for ALL calculations. State the common base date in the appendix for every return calculation.
 
-**P/E Currency Rule (LTM P/E):** When computing LTM P/E for each company, use that company's **most recent 4 reported quarters** from `peer-eps.csv` — not a fixed calendar window applied to all. If a peer has already reported Q4 2025 while the subject company has only reported through Q3 2025, the peer's LTM EPS should include Q4 2025. Check the latest reported period for each company and use the 4 most recent periods per company. Note in the appendix which 4 quarters were used for each P/E calculation.
+**P/E Currency Rule (LTM P/E):** When computing LTM P/E for each company, use that company's **most recent 4 reported quarters** from `peer-eps.csv` — not a fixed calendar window applied to all. If a peer has already reported Q4 2025 while the subject company has only reported through Q3 2025, the peer's LTM EPS should include Q4 2025. Check the latest reported period for each company (from Yahoo Finance MCP `get_financials`) and use the 4 most recent periods per company. Note in the appendix which 4 quarters were used for each P/E calculation.
 
 **Market Cap Date-Stamp:** When reporting market cap, use the `retrieval_date` from `peer-market-caps.csv`. If it differs from the report date, note this in the appendix.
 
 ---
 
-## Phase 4: News, Estimates & Sector Intelligence (via Kensho Grounding)
+## Phase 4: News, Estimates & Sector Intelligence (via Web Search)
 
-Run these `search` queries for **each** category below. Do NOT skip any.
+Run these web search queries for **each** category below. Do NOT skip any.
 
-**CRITICAL — Capture Source URLs:** Every Kensho `search` result includes a **source URL** for the underlying article, report, or data page. You MUST record the URL alongside each finding.
+**CRITICAL — Capture Source URLs:** Every web search result should include the **source URL** for the underlying article, report, or data page. You MUST record the URL alongside each finding.
 
-**After EACH search call, immediately append the results to** `/tmp/earnings-preview/kensho-findings.txt` using the format below. Do NOT wait until all searches are done — write after each one:
+**After EACH search call, immediately append the results to** `/tmp/earnings-preview/web-findings.txt` using the format below. Do NOT wait until all searches are done — write after each one:
 
 ```
 === SEARCH: "[query used]" ===
@@ -195,73 +195,73 @@ SOURCE_2: [publication name, date]
 ```
 
 **Earnings estimates & analyst sentiment:**
-1. `search` for "[TICKER] earnings estimates consensus EPS revenue upcoming quarter"
+1. `web_search` for "[TICKER] earnings estimates consensus EPS revenue upcoming quarter"
    - Record: consensus EPS, consensus revenue, estimate revision direction over last 90 days.
-   - **Append to kensho-findings.txt immediately.**
-2. `search` for "[TICKER] analyst ratings price target upgrades downgrades"
+   - **Append to web-findings.txt immediately.**
+2. `web_search` for "[TICKER] analyst ratings price target upgrades downgrades"
    - Record: recent upgrades/downgrades, price target range, bull/bear thesis summaries.
-   - **Append to kensho-findings.txt immediately.**
-3. `search` for "[TICKER] risks bear case concerns investors"
+   - **Append to web-findings.txt immediately.**
+3. `web_search` for "[TICKER] risks bear case concerns investors"
    - Record: key debates, bear arguments, swing factors for the upcoming print.
-   - **Append to kensho-findings.txt immediately.**
+   - **Append to web-findings.txt immediately.**
 
 **Recent news (MANDATORY — do not skip):**
-4. `search` for "[TICKER] [company name] recent news developments"
+4. `web_search` for "[TICKER] [company name] recent news developments"
    - Record: material news from the last 60 days — M&A, product launches, executive changes, regulatory actions, partnerships, legal developments, tariffs, or any event that could affect the upcoming earnings print or forward guidance.
    - For each item, note the date, headline, potential earnings impact.
-   - **Append to kensho-findings.txt immediately.**
+   - **Append to web-findings.txt immediately.**
 
 **Sector context:**
-5. `search` for "[company industry/sector] sector outlook trends"
+5. `web_search` for "[company industry/sector] sector outlook trends"
    - Record: sector-level tailwinds/headwinds, macro data, competitive dynamics.
-   - **Append to kensho-findings.txt immediately.**
+   - **Append to web-findings.txt immediately.**
 
 ---
 
 ## Phase 5: Financial Data Collection
 
 **Quarterly financials (last 8 quarters):**
-`get_financial_line_item_from_identifiers` with `period_type="quarterly"`, `num_periods=8` for:
+Yahoo Finance MCP `get_financials` with type "income" and period "quarterly" for:
 `revenue`, `gross_profit`, `operating_income`, `ebitda`, `net_income`, `diluted_eps`
 
-**After each line item call returns, immediately append to** `/tmp/earnings-preview/financials.csv`. Write the raw values exactly as returned — do NOT round or convert yet. Include the `source` column with the exact MCP function call and parameters:
+**After each financials call returns, immediately append to** `/tmp/earnings-preview/financials.csv`. Write the raw values exactly as returned — do NOT round or convert yet. Include the `source` column with the data source:
 ```
 ticker,period,line_item,value,source
-D,Q4 2024,revenue,3941000000,get_financial_line_item_from_identifiers(identifier='D',line_item='revenue',period_type='quarterly')
-D,Q1 2025,revenue,3400000000,get_financial_line_item_from_identifiers(identifier='D',line_item='revenue',period_type='quarterly')
-D,Q2 2025,revenue,4076000000,get_financial_line_item_from_identifiers(identifier='D',line_item='revenue',period_type='quarterly')
-D,Q3 2025,revenue,3810000000,get_financial_line_item_from_identifiers(identifier='D',line_item='revenue',period_type='quarterly')
-D,Q4 2024,diluted_eps,1.09,get_financial_line_item_from_identifiers(identifier='D',line_item='diluted_eps',period_type='quarterly')
-D,Q1 2025,diluted_eps,-0.11,get_financial_line_item_from_identifiers(identifier='D',line_item='diluted_eps',period_type='quarterly')
+D,Q4 2024,revenue,3941000000,get_financials(ticker='D',type='income',period='quarterly')
+D,Q1 2025,revenue,3400000000,get_financials(ticker='D',type='income',period='quarterly')
+D,Q2 2025,revenue,4076000000,get_financials(ticker='D',type='income',period='quarterly')
+D,Q3 2025,revenue,3810000000,get_financials(ticker='D',type='income',period='quarterly')
+D,Q4 2024,diluted_eps,1.09,get_financials(ticker='D',type='income',period='quarterly')
+D,Q1 2025,diluted_eps,-0.11,get_financials(ticker='D',type='income',period='quarterly')
 ...
 ```
 
 **Do NOT calculate margins or growth rates yet.** Write raw data only. Calculations happen in Phase 6.
 
 **Segment data:**
-- `get_segments_from_identifiers` with `segment_type="business"`, `period_type="quarterly"`, `num_periods=8`
-- You need 8 quarters (not 4) so you have the year-ago quarter for y/y comparisons. To calculate y/y for Q3 2025, you need Q3 2024 — which is the 5th quarter back. **If the prior-year quarter's segment data is not available in the API response, do NOT estimate or fabricate it. State "y/y not available" in the report.**
+- Use SEC EDGAR MCP `sec_edgar_filings` to retrieve the most recent 10-Q filings and extract segment revenue disclosures. Alternatively, search web for "[TICKER] segment revenue breakdown quarterly".
+- You need 8 quarters (not 4) so you have the year-ago quarter for y/y comparisons. To calculate y/y for Q3 2025, you need Q3 2024 — which is the 5th quarter back. **If the prior-year quarter's segment data is not available, do NOT estimate or fabricate it. State "y/y not available" in the report.**
 
 **Immediately write** `/tmp/earnings-preview/segments.csv`:
 ```
 ticker,period,segment_name,revenue,source
-D,Q3 2024,Dominion Energy Virginia,2762000000,get_segments_from_identifiers(identifier='D',segment_type='business',period_type='quarterly')
-D,Q3 2024,Dominion Energy South Carolina,848000000,get_segments_from_identifiers(identifier='D',segment_type='business',period_type='quarterly')
-D,Q3 2024,Contracted Energy,260000000,get_segments_from_identifiers(identifier='D',segment_type='business',period_type='quarterly')
-D,Q3 2025,Dominion Energy Virginia,3311000000,get_segments_from_identifiers(identifier='D',segment_type='business',period_type='quarterly')
-D,Q3 2025,Dominion Energy South Carolina,945000000,get_segments_from_identifiers(identifier='D',segment_type='business',period_type='quarterly')
-D,Q3 2025,Contracted Energy,297000000,get_segments_from_identifiers(identifier='D',segment_type='business',period_type='quarterly')
+D,Q3 2024,Dominion Energy Virginia,2762000000,sec_edgar_filings(ticker='D',form_type='10-Q')
+D,Q3 2024,Dominion Energy South Carolina,848000000,sec_edgar_filings(ticker='D',form_type='10-Q')
+D,Q3 2024,Contracted Energy,260000000,sec_edgar_filings(ticker='D',form_type='10-Q')
+D,Q3 2025,Dominion Energy Virginia,3311000000,sec_edgar_filings(ticker='D',form_type='10-Q')
+D,Q3 2025,Dominion Energy South Carolina,945000000,sec_edgar_filings(ticker='D',form_type='10-Q')
+D,Q3 2025,Contracted Energy,297000000,sec_edgar_filings(ticker='D',form_type='10-Q')
 ...
 ```
 
 **Earnings history (for stock chart annotations):**
-- `get_earnings_from_identifiers` — collect past earnings dates within the 12-month price window.
+- Yahoo Finance MCP `get_quote` returns earnings date. For historical earnings dates within the 12-month price window, use Yahoo Finance MCP `get_financials` quarterly periods or search web for "[TICKER] earnings dates history".
 - **Immediately write** `/tmp/earnings-preview/earnings-dates.csv`:
 ```
 ticker,earnings_date,call_name,source
-D,2025-05-02,Q1 2025 Earnings Call,get_earnings_from_identifiers(identifier='D')
-D,2025-08-01,Q2 2025 Earnings Call,get_earnings_from_identifiers(identifier='D')
-D,2025-10-31,Q3 2025 Earnings Call,get_earnings_from_identifiers(identifier='D')
+D,2025-05-02,Q1 2025 Earnings Call,get_quote(ticker='D') / web search
+D,2025-08-01,Q2 2025 Earnings Call,get_quote(ticker='D') / web search
+D,2025-10-31,Q3 2025 Earnings Call,get_quote(ticker='D') / web search
 ...
 ```
 
@@ -280,7 +280,7 @@ Before generating the report, read back ALL intermediate files and perform calcu
    - `cat /tmp/earnings-preview/peer-eps.csv`
    - `cat /tmp/earnings-preview/peer-market-caps.csv`
    - `cat /tmp/earnings-preview/consensus-eps.csv`
-   - `cat /tmp/earnings-preview/kensho-findings.txt`
+   - `cat /tmp/earnings-preview/web-findings.txt`
    - `cat /tmp/earnings-preview/earnings-dates.csv`
 
 2. **Calculate derived metrics** from the raw data now in context:
@@ -290,7 +290,7 @@ Before generating the report, read back ALL intermediate files and perform calcu
    - EPS y/y growth % = same logic; use "n.m." if base is negative
    - Segment y/y growth % = match segment by name to year-ago Q; if missing, note "y/y not available"
    - LTM P/E per company = latest price / sum of most recent 4 quarterly EPS (check which 4 quarters are available per ticker using `peer-eps.csv`)
-   - NTM P/E per company = latest price / NTM EPS, where **NTM EPS = sum of the next 4 quarterly consensus mean EPS estimates** from `consensus-eps.csv`. Add all 4 quarters' consensus_mean_eps values for each ticker. If fewer than 4 forward quarters are available for a peer, mark NTM P/E as "n/a". Note in the appendix which 4 quarters were summed.
+   - NTM P/E per company = latest price / NTM EPS, where **NTM EPS = sum of the next 4 quarterly consensus mean EPS estimates** from `consensus-eps.csv` (sourced from web search). Add all 4 quarters' consensus_mean_eps values for each ticker. If fewer than 4 forward quarters are available for a peer, mark NTM P/E as "n/a". Note in the appendix which 4 quarters were summed.
    - Stock returns (YTD, 1-yr, 30d, 90d) = find the **common first date across all tickers** in `prices.csv`, then compute returns from that date
 
 3. **Cross-check**:
@@ -305,7 +305,7 @@ ticker,metric,value,formula,components
 D,gross_margin_Q3_2025,32.5%,gross_profit/revenue,"gross_profit=1238100000,revenue=3810000000"
 D,revenue_yoy_Q3_2025,+9.3%,(Q3_2025-Q3_2024)/Q3_2024,"Q3_2025=3810000000,Q3_2024=3486000000"
 D,ltm_pe,24.2x,price/ltm_eps,"price=65.46,ltm_eps=2.70,quarters=Q4_2024+Q1_2025+Q2_2025+Q3_2025"
-D,ntm_pe,18.5x,price/ntm_eps,"price=65.46,ntm_eps=3.56,quarters=Q4_2025(0.88)+Q1_2026(0.72)+Q2_2026(0.91)+Q3_2026(1.05),source=get_consensus_estimates_from_identifiers"
+D,ntm_pe,18.5x,price/ntm_eps,"price=65.46,ntm_eps=3.56,quarters=Q4_2025(0.88)+Q1_2026(0.72)+Q2_2026(0.91)+Q3_2026(1.05),source=web_search(consensus estimates)"
 D,yoy_return,+17.6%,(end-start)/start,"end=65.46,start=55.67,base_date=2025-02-19"
 DUK,yoy_return,+13.0%,(end-start)/start,"end=126.32,start=111.79,base_date=2025-02-19"
 ...
@@ -331,7 +331,7 @@ Run these commands **one at a time, each as its own bash call**:
 6. `cat /tmp/earnings-preview/peer-eps.csv`
 7. `cat /tmp/earnings-preview/peer-market-caps.csv`
 8. `cat /tmp/earnings-preview/consensus-eps.csv`
-9. `cat /tmp/earnings-preview/kensho-findings.txt`
+9. `cat /tmp/earnings-preview/web-findings.txt`
 10. `cat /tmp/earnings-preview/earnings-dates.csv`
 11. `cat /tmp/earnings-preview/calculations.csv`
 
@@ -347,7 +347,7 @@ Run these commands **one at a time, each as its own bash call**:
 6. peer-eps.csv            ✓ loaded ([N] rows)
 7. peer-market-caps.csv    ✓ loaded ([N] rows)
 8. consensus-eps.csv       ✓ loaded ([N] rows)
-9. kensho-findings.txt     ✓ loaded ([N] lines)
+9. web-findings.txt        ✓ loaded ([N] lines)
 10. earnings-dates.csv     ✓ loaded ([N] rows)
 11. calculations.csv       ✓ loaded ([N] rows)
 
@@ -468,36 +468,37 @@ The final page(s) of the report MUST include an Appendix table that documents **
 - **Value**: The exact figure as displayed in the report (e.g., "$152.3B", "24.5%", "28.1x"). For non-numeric facts, leave blank or write "N/A".
 - **Source & Derivation**: This is the critical column. **Every row must have a specific, detailed source — not just a label.** Follow these rules strictly:
 
-  **For raw financial data from S&P Capital IQ (revenue, EPS, gross profit, operating income, net income, EBITDA, prices, market cap, etc.):**
-  - State the MCP function used and its key parameters. Format: `S&P Capital IQ — [function_name](identifier='[TICKER]', line_item='[item]', period_type='[type]', period='[Q# FY####]')`
+  **For raw financial data from Yahoo Finance MCP or SEC EDGAR MCP:**
+  - State the data source and tool used. Format: `Yahoo Finance MCP — [tool_name](ticker='[TICKER]', ...)` or `SEC EDGAR MCP — [tool_name](ticker='[TICKER]', ...)`
+  - For web search: `Web search — query: "[query text]", source: [URL]`
   - Examples:
-    - `S&P Capital IQ — get_financial_line_item_from_identifiers(identifier='WMT', line_item='revenue', period_type='quarterly', period='Q3 FY2026')`
-    - `S&P Capital IQ — get_financial_line_item_from_identifiers(identifier='WMT', line_item='diluted_eps', period_type='quarterly', period='Q3 FY2026')`
-    - `S&P Capital IQ — get_prices_from_identifiers(identifier='WMT', periodicity='day')`
-    - `S&P Capital IQ — get_capitalization_from_identifiers(identifier='WMT', capitalization='market_cap')`
-  - **Do NOT just write "S&P Capital IQ" with no detail.** The reader must know exactly which data point from which tool call produced this number.
+    - `Yahoo Finance MCP — get_financials(ticker='WMT', type='income', period='quarterly') — Q3 FY2026 revenue`
+    - `Yahoo Finance MCP — get_financials(ticker='WMT', type='income', period='quarterly') — Q3 FY2026 diluted_eps`
+    - `Yahoo Finance MCP — get_historical(ticker='WMT', period='1y', interval='1d')`
+    - `Yahoo Finance MCP — get_quote(ticker='WMT') — market_cap`
+  - **Do NOT just write "Yahoo Finance MCP" or "SEC EDGAR MCP" with no detail.** The reader must know exactly which data point from which tool call produced this number.
 
   **For calculated values (margins, growth rates, P/E, returns, y/y changes):**
   - Show the full formula with **hyperlinked components** — each component must be an `<a href="#ref-N">` link back to the appendix row for that raw data point. This is critical: the reader must be able to click through from the calculated value to each of its inputs.
-  - Example: `Gross Margin = <a href='#ref-5'>Gross Profit $37.2B</a> / <a href='#ref-1'>Revenue $152.3B</a> = 24.4%. Source: S&P Capital IQ (calculated)`
+  - Example: `Gross Margin = <a href='#ref-5'>Gross Profit $37.2B</a> / <a href='#ref-1'>Revenue $152.3B</a> = 24.4%. Source: Yahoo Finance MCP (calculated)`
   - Example: `LTM P/E = <a href='#ref-20'>Price $172.35</a> / (<a href='#ref-8'>Q1 EPS $1.47</a> + <a href='#ref-9'>Q2 EPS $1.84</a> + <a href='#ref-10'>Q3 EPS $1.53</a> + <a href='#ref-11'>Q4 EPS $1.80</a>) = $172.35 / $6.64 = 25.9x`
   - Example: `Revenue y/y growth = (<a href='#ref-12'>Q3 FY26 Rev $165.8B</a> - <a href='#ref-3'>Q3 FY25 Rev $160.8B</a>) / <a href='#ref-3'>Q3 FY25 Rev $160.8B</a> = +3.1%`
   - **Every formula component must be a clickable hyperlink.** Do NOT write formulas with plain-text numbers.
 
   **For transcript-sourced claims (quotes, management commentary, guidance):**
   - Write the **verbatim excerpt sentence** from the transcript.
-  - Reference the transcript by its full name and the `key_dev_id` used to fetch it.
-  - Format: `"[verbatim quote]" — [Speaker], [Title]. Source: [Q# FY#### Earnings Call Transcript] (key_dev_id: [ID])`
-  - Example: `"We expect comp sales growth of 3-4% in Q4" — CEO John Furner. Source: Q3 FY2026 Earnings Call Transcript (key_dev_id: 12345678)`
+  - Reference the transcript by its full name and the source URL where it was retrieved.
+  - Format: `"[verbatim quote]" — [Speaker], [Title]. Source: [Q# FY#### Earnings Call Transcript] (<a href="[URL]" target="_blank">[source]</a>)`
+  - Example: `"We expect comp sales growth of 3-4% in Q4" — CEO John Furner. Source: Q3 FY2026 Earnings Call Transcript (<a href="https://seekingalpha.com/..." target="_blank">Seeking Alpha</a>)`
 
-  **For Kensho Grounding search results (news, analyst ratings, consensus estimates):**
+  **For web search results (news, analyst ratings, consensus estimates):**
   - Write the key finding or excerpt from the search result.
-  - **MANDATORY: Include the source URL** returned by the Kensho `search` tool as a clickable `<a href="[URL]" target="_blank">` hyperlink. This is the most important part — readers must be able to click through to the original source.
-  - Format: `"[finding/excerpt]" — <a href="[URL]" target="_blank">[Source Title or Publication]</a>. Query: search("[query used]")`
-  - Example: `"Barclays upgraded WMT to Overweight with $210 price target on Jan 15, 2026." — <a href="https://www.investing.com/news/barclays-upgrades-wmt" target="_blank">Investing.com, Jan 15 2026</a>. Query: search("WMT analyst ratings price target upgrades downgrades")`
+  - **MANDATORY: Include the source URL** from the web search result as a clickable `<a href="[URL]" target="_blank">` hyperlink. This is the most important part — readers must be able to click through to the original source.
+  - Format: `"[finding/excerpt]" — <a href="[URL]" target="_blank">[Source Title or Publication]</a>. Query: web_search("[query used]")`
+  - Example: `"Barclays upgraded WMT to Overweight with $210 price target on Jan 15, 2026." — <a href="https://www.investing.com/news/barclays-upgrades-wmt" target="_blank">Investing.com, Jan 15 2026</a>. Query: web_search("WMT analyst ratings price target upgrades downgrades")`
   - If no URL was returned for a particular result, write "Source URL not available" and still include the search query.
 
-**Completeness check:** Before finalizing the report, scan every number in the report body. If any number is not wrapped in `<a href="#ref-N" class="data-ref">`, fix it. If any appendix row has a Source & Derivation that is just a bare label like "S&P Capital IQ" with no function call detail, fix it. If any calculated value's formula lacks hyperlinked components, fix it. If any Kensho-sourced claim lacks a source URL, fix it.
+**Completeness check:** Before finalizing the report, scan every number in the report body. If any number is not wrapped in `<a href="#ref-N" class="data-ref">`, fix it. If any appendix row has a Source & Derivation that is just a bare label like "Yahoo Finance MCP" with no function call detail, fix it. If any calculated value's formula lacks hyperlinked components, fix it. If any web-search-sourced claim lacks a source URL, fix it.
 
 Group the appendix rows by section (Financials, Valuation, Estimates & Consensus, Transcript Claims, News & Analyst Commentary, Stock Performance) with subheadings. Use smaller font size (10-11px).
 
