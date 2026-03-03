@@ -10,7 +10,7 @@
       "command": "npx",
       "args": ["-y", "axiom-data-mcp"],
       "env": {
-        "SEC_EDGAR_USER_AGENT": "YourName your@email.com"
+        "SEC_EDGAR_USER_AGENT": "Hui Wu bukysun555@gmail.com"
       }
     }
   }
