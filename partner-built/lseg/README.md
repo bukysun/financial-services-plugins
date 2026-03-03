@@ -58,5 +58,5 @@ claude plugins add LSEG
 
 ## Requirements
 
-- Access to the LSEG MCP Server with valid credentials
-- LSEG data entitlements for the relevant product offerings
+- Free FRED API key (register at https://fred.stlouisfed.org/docs/api/api_key.html)
+- Node.js installed (for running MCP servers via npx)
