@@ -2,16 +2,14 @@
   "mcpServers": {
     "fred": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "fred-mcp-server"],
+      "command": "fred-mcp-server",
       "env": {
         "FRED_API_KEY": "bfd5cf73039b0d3a30758debe71b7649"
       }
     },
     "yahoo-finance": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "yfinance-mcp"]
+      "command": "yfinance-mcp"
     }
   }
 }

@@ -2,13 +2,11 @@
   "mcpServers": {
     "yahoo-finance": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "yfinance-mcp"]
+      "command": "yfinance-mcp"
     },
     "sec-edgar": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "axiom-data-mcp"],
+      "command": "axiom-data-mcp",
       "env": {
         "SEC_EDGAR_USER_AGENT": "Hui Wu bukysun555@gmail.com"
       }

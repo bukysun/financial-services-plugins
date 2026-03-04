@@ -2,21 +2,18 @@
   "mcpServers": {
     "yahoo-finance": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "yfinance-mcp"]
+      "command": "yfinance-mcp"
     },
     "fred": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "fred-mcp-server"],
+      "command": "fred-mcp-server",
       "env": {
         "FRED_API_KEY": "bfd5cf73039b0d3a30758debe71b7649"
       }
     },
     "sec-edgar": {
       "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "axiom-data-mcp"],
+      "command": "axiom-data-mcp",
       "env": {
         "SEC_EDGAR_USER_AGENT": "Hui Wu bukysun555@gmail.com"
       }
