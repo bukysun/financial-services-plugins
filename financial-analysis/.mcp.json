@@ -15,7 +15,8 @@
       "type": "stdio",
       "command": "axiom-data-mcp",
       "env": {
-        "SEC_EDGAR_USER_AGENT": "Hui Wu bukysun555@gmail.com"
+        "SEC_EDGAR_USER_AGENT": "Hui Wu bukysun555@gmail.com",
+        "FRED_API_KEY": "bfd5cf73039b0d3a30758debe71b7649"
       }
     }
   }
